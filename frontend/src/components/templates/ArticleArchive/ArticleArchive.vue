@@ -5,10 +5,10 @@
     <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
       <div class="mb-8">
         <Heading :level="1" size="3xl" class="mb-2">
-          Article Archive
+          Rentigo
         </Heading>
         <Text as="p" size="lg" color="muted">
-          Browse our collection of articles
+          Premium car rentals for your next adventure
         </Text>
       </div>
       

@@ -7,7 +7,6 @@ use PDO;
 
 class Repository 
 {
-    // it is static so it's shared across all instances
     private static ?PDO $connection = null;
 
     public function __construct()

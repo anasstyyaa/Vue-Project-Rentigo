@@ -1,5 +1,5 @@
 <script setup>
-import ArticleArchivePage from './components/pages/ArticleArchivePage/ArticleArchivePage.vue'
+import ArticleArchivePage from './components/pages/CarArchivePage/CarArchivePage.vue'
 </script>
 
 <template>

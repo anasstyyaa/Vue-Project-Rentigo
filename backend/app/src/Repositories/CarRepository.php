@@ -10,14 +10,44 @@ use PDO;
 class CarRepository extends Repository implements ICarRepository
 {
     public function getAll(): array{
-        $sql = "SELECT * FROM cars WHERE isDeleted = 0";
+        $sql = "SELECT 
+                CarId AS carId, 
+                Brand AS brand, 
+                Model AS model, 
+                Year AS year, 
+                PricePerDay AS pricePerDay, 
+                Transmission AS transmission, 
+                FuelType AS fuelType, 
+                Seats AS seats, 
+                Color AS color, 
+                Description AS description, 
+                IsAvailable AS isAvailable, 
+                CreatedAt AS createdAt, 
+                IsDeleted AS isDeleted 
+            FROM Cars 
+            WHERE IsDeleted = 0";
 
         $stmt = $this->getConnection()->query($sql);
         return $stmt->fetchAll(PDO::FETCH_CLASS, Car::class);
     }
 
     public function getById(int $id): ?Car{
-        $sql= "SELECT * FROM cars WHERE carId = :id AND isDeleted = 0";
+        $sql = "SELECT 
+                CarId AS carId, 
+                Brand AS brand, 
+                Model AS model, 
+                Year AS year, 
+                PricePerDay AS pricePerDay, 
+                Transmission AS transmission, 
+                FuelType AS fuelType, 
+                Seats AS seats, 
+                Color AS color, 
+                Description AS description, 
+                IsAvailable AS isAvailable, 
+                CreatedAt AS createdAt, 
+                IsDeleted AS isDeleted 
+            FROM Cars 
+            WHERE CarId = :id AND IsDeleted = 0";
 
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute(['id' => $id]);
@@ -26,7 +56,7 @@ class CarRepository extends Repository implements ICarRepository
     }
 
     public function create(Car $car): bool{
-       $sql = "INSERT INTO cars (brand, model, year, pricePerDay, transmission, fuelType, seats, color, description, isAvailable) 
+       $sql = "INSERT INTO Cars (brand, model, year, pricePerDay, transmission, fuelType, seats, color, description, isAvailable) 
                 VALUES (:brand, :model, :year, :pricePerDay, :transmission, :fuelType, :seats, :color, :description, :isAvailable)";
 
        $stmt = $this->getConnection()->prepare($sql);
@@ -46,7 +76,7 @@ class CarRepository extends Repository implements ICarRepository
     }
 
     public function update(Car $car): bool{
-        $sql = "UPDATE cars SET 
+        $sql = "UPDATE Cars SET 
                 brand = :brand, model = :model, year = :year, pricePerDay = :pricePerDay, 
                 transmission = :transmission, fuelType = :fuelType, seats = :seats, 
                 color = :color, description = :description, isAvailable = :isAvailable 
@@ -70,7 +100,7 @@ class CarRepository extends Repository implements ICarRepository
     }
 
     public function delete(int $id): bool{
-        $sql = "UPDATE cars SET isDeleted = 1 WHERE carId = :id";
+        $sql = "UPDATE Cars SET isDeleted = 1 WHERE carId = :id";
 
         $stmt = $this->getConnection()->prepare($sql);
         return $stmt->execute([':id' => $id]);

@@ -1,7 +1,7 @@
 <script setup>
-import ArticleArchivePage from './components/pages/CarArchivePage/CarArchivePage.vue'
+import CarArchivePage from './components/pages/CarArchivePage/CarArchivePage.vue'
 </script>
 
 <template>
-  <ArticleArchivePage />
+  <router-view />
 </template>

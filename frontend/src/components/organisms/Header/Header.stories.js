@@ -9,10 +9,8 @@ export default {
 export const Default = {
   args: {
     navigationLinks: [
-      { name: 'Home', href: '/' },
-      { name: 'Articles', href: '/articles' },
-      { name: 'About', href: '/about' },
-      { name: 'Contact', href: '/contact' },
+      { name: 'Home', href: '/api/cars' },
+      { name: 'Profile', href: '/profile' },
     ],
   },
 };

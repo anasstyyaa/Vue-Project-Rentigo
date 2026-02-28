@@ -34,7 +34,7 @@ const fetchCars = async () => {
   error.value = null;
 
   try {
-    const response = await get("/cars"); 
+    const response = await get("/api/cars"); 
 
     if (!response.ok) {
       throw new Error(`Error ${response.status}: Failed to load the fleet.`);

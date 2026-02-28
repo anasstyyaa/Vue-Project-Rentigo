@@ -55,13 +55,13 @@ class CarRepository extends Repository implements ICarRepository
         return $car ?: null;
     }
 
-    public function create(Car $car): bool{
+    public function create(Car $car): ?Car{
        $sql = "INSERT INTO Cars (brand, model, year, pricePerDay, transmission, fuelType, seats, color, description, isAvailable) 
                 VALUES (:brand, :model, :year, :pricePerDay, :transmission, :fuelType, :seats, :color, :description, :isAvailable)";
 
        $stmt = $this->getConnection()->prepare($sql);
       
-       return $stmt->execute([
+       if ($stmt->execute([
             ':brand' => $car->brand,
             ':model' => $car->model,
             ':year' => $car->year,
@@ -72,7 +72,11 @@ class CarRepository extends Repository implements ICarRepository
             ':color' => $car->color,
             ':description' => $car->description,
             ':isAvailable' => (int)$car->isAvailable
-        ]);
+        ])) {
+            $car->carId = (int)$this->getConnection()->lastInsertId();
+            return $car;
+        }
+        return null;
     }
 
     public function update(Car $car): bool{

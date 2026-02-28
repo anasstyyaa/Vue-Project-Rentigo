@@ -36,8 +36,17 @@ use function FastRoute\simpleDispatcher;
  * Define the routes for the application.
  */
 $dispatcher = simpleDispatcher(function (RouteCollector $r) {
-    $r->addRoute('GET', '/cars', ['App\Controllers\CarController', 'getAll']);
-    $r->addRoute('GET', '/cars/{id:\d+}', ['App\Controllers\CarController', 'get']);
+
+    // cars 
+    $r->addRoute('GET', '/api/cars', ['App\Controllers\CarController', 'getAll']);
+    $r->addRoute('POST', '/api/cars', ['App\Controllers\CarController', 'create']);
+    $r->addRoute('GET', '/api/cars/{id:\d+}', ['App\Controllers\CarController', 'get']);
+    $r->addRoute('PUT', '/api/cars/{id:\d+}', ['App\Controllers\CarController', 'update']);
+    $r->addRoute('DELETE', '/api/cars/{id:\d+}', ['App\Controllers\CarController', 'delete']);
+
+    // users
+    $r->addRoute('POST', '/api/login', ['App\Controllers\UserController', 'login']);
+    $r->addRoute('POST', '/api/register', ['App\Controllers\UserController', 'register']);
 });
 
 
@@ -70,11 +79,18 @@ switch ($routeInfo[0]) {
         $method = $handler[1];
 
         if ($class === 'App\Controllers\CarController') {
+
             $repository = new \App\Repositories\CarRepository();
             $service = new \App\Services\CarService($repository);
-            
             $controller = new $class($service);
-        } else {
+
+        } elseif ($class === 'App\Controllers\UserController') {
+
+            $repository = new \App\Repositories\UserRepository();
+            $service = new \App\Services\UserService($repository);
+            $controller = new $class($service);
+
+        }else {
             $controller = new $class();
         }
         

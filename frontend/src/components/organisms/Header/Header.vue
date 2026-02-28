@@ -78,9 +78,7 @@ defineProps({
     type: Array,
     default: () => [
       { name: "Home", href: "/" },
-      { name: "Articles", href: "/articles" },
-      { name: "About", href: "/about" },
-      { name: "Contact", href: "/contact" },
+      { name: "Profile", href: "/profile" },
     ],
   },
 });

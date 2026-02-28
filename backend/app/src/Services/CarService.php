@@ -28,7 +28,7 @@ class CarService implements ICarService
         return $this->repository->getById($id);
     }
 
-    public function create(Car $car): bool
+    public function create(Car $car): ?Car
     {
         return $this->repository->create($car);
     }

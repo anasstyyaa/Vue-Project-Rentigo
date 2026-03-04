@@ -17,50 +17,66 @@ class UserController extends Controller
 
     public function login()
     {
-        $data = json_decode(file_get_contents('php://input'), true);
-        
-        $email = $data['email'] ?? '';
-        $password = $data['password'] ?? '';
+        try {
+            $data = json_decode(file_get_contents('php://input'), true);
+            
+            $email = $data['email'] ?? '';
+            $password = $data['password'] ?? '';
 
-        if (empty($email) || empty($password)) {
-            return $this->sendErrorResponse('Email and password are required', 400);
+            if (empty($email) || empty($password)) {
+                return $this->sendErrorResponse('Email and password are required', 400);
+            }
+
+            $user = $this->userService->authenticate($email, $password);
+
+            if ($user) {
+                return $this->sendSuccessResponse([
+                    'message' => 'Login successful',
+                    'user' => $user
+                ]);
+            }
+
+            return $this->sendErrorResponse('Invalid credentials', 401);
+        } catch (\Exception $e) {
+            return $this->sendErrorResponse('An error occurred during login', 500);
         }
-
-        $user = $this->userService->authenticate($email, $password);
-
-        if ($user) {
-            return $this->sendSuccessResponse([
-                'message' => 'Login successful',
-                'user' => $user
-            ]);
-        }
-
-        return $this->sendErrorResponse('Invalid credentials', 401);
     }
 
     public function register()
     {
-        $user = $this->mapPostDataToClass(User::class);
+        try {
+            $user = $this->mapPostDataToClass(User::class);
 
-        if (empty($user->email) || empty($user->passwordHash)) {
-            return $this->sendErrorResponse('Email and password are required', 400);
+            if (empty($user->email) || empty($user->passwordHash)) {
+                return $this->sendErrorResponse('Email and password are required', 400);
+            }
+
+            if (empty($user->phoneNumber)) {
+                return $this->sendErrorResponse('Phone number is required', 400);
+            }
+
+            if (empty($user->firstName) || empty($user->lastName)) {
+                return $this->sendErrorResponse('First name and last name are required', 400);
+            }
+
+            $user->roleId = 1; // Default to regular user role
+
+            $createdUser = $this->userService->register($user);
+
+            if ($createdUser) {
+                return $this->sendSuccessResponse($createdUser, 201);
+            }
+
+            return $this->sendErrorResponse('Registration failed', 409);
+
+        } catch (\PDOException $e) {
+            if ($e->getCode() == 23000) {
+                return $this->sendErrorResponse('This email is already registered.', 409);
+            }
+
+            return $this->sendErrorResponse('Database error: ' . $e->getMessage(), 500);
+        } catch (\Exception $e) {
+            return $this->sendErrorResponse('Server error: ' . $e->getMessage(), 500);
         }
-
-        if (empty($user->phoneNumber)) {
-            return $this->sendErrorResponse('Phone number is required', 400);
-        }
-
-        if (empty($user->firstName) || empty($user->lastName)) {
-            return $this->sendErrorResponse('First name and last name are required', 400);
-        }
-
-        $createdUser = $this->userService->register($user);
-
-        if ($createdUser) {
-            return $this->sendSuccessResponse($createdUser, 201);
-        }
-
-        return $this->sendErrorResponse('Registration failed', 409);
     }
-
 }

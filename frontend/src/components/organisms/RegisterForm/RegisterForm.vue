@@ -19,6 +19,11 @@
       </div>
 
       <div>
+        <Text as="label" size="sm" weight="semibold">Phone Number</Text>
+        <input v-model="formData.phoneNumber" type="text" class="form-input" required />
+      </div>
+
+      <div>
         <Text as="label" size="sm" weight="semibold">Email</Text>
         <input v-model="formData.email" type="email" class="form-input" required />
       </div>
@@ -39,6 +44,16 @@
         class="w-full mt-4"
         @click="handleSubmit"
       />
+
+      <div class="text-center pt-2">
+        <Text size="sm" color="muted">
+          Already have an account? 
+          <router-link to="/login" class="text-blue-600 font-bold hover:underline">
+            Log in here
+          </router-link>
+        </Text>
+      </div>
+
     </form>
   </div>
 </template>

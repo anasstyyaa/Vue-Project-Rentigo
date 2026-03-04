@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50">
-    <Header :navigation-links="navigationLinks" />
+    <Header />
     
     <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
       <div class="mb-8">
@@ -52,13 +52,6 @@ const props = defineProps({
     type: Array,
     required: true,
     default: () => [],
-  },
-  navigationLinks: {
-    type: Array,
-    default: () => [
-      { name: 'Home', href: '/' },
-      { name: 'Profile', href: '/profile' },
-    ],
   },
   footerQuickLinks: {
     type: Array,

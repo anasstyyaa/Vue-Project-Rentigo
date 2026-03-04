@@ -5,10 +5,10 @@
     </template>
 
     <template #form>
-      <RegisterForm 
+      <LoginForm 
         :loading="isLoading" 
         :error="errorMessage" 
-        @register="handleRegister" 
+        @login="handleLogin" 
       />
     </template>
   </AuthTemplate>
@@ -16,38 +16,45 @@
 
 <script setup>
 import { ref } from 'vue';
-import { post } from "../../../utils/api.js";
 import { useRouter } from "vue-router";
+import { post } from "../../../utils/api.js";
 
 import AuthTemplate from '../../templates/AuthTemplate/AuthTemplate.vue';
 import Header from '../../organisms/Header/Header.vue';
-import RegisterForm from '../../organisms/RegisterForm/RegisterForm.vue';
+import LoginForm from '@/components/organisms/LoginForm/LoginForm.vue';
 
 const router = useRouter();
 const isLoading = ref(false);
 const errorMessage = ref('');
 
-const handleRegister = async (data) => {
+const handleLogin = async (data) => {
   isLoading.value = true;
-  errorMessage.value = '';
+  errorMessage.value = null;
 
-  try {
-    
-    const response = await post("/api/register", {
-      firstName: data.firstName,
-      lastName: data.lastName,
+  try { 
+    const response = await post("/api/login", {
       email: data.email,
-      passwordHash: data.password, 
-      phoneNumber: data.phoneNumber
+      password: data.password
     });
 
     const result = await response.json();
 
     if (!response.ok) {
-      throw new Error(result.message || "Registration failed");
+      throw new Error(result.error || result.message || "Login failed");
     }
 
-    router.push({ path: '/login', query: { registered: 'true' } });
+    const loggedInUser = result.user; 
+    
+    if (loggedInUser) {
+      console.log("Found user:", loggedInUser.firstName);
+
+      localStorage.setItem('user', JSON.stringify(loggedInUser));
+
+      router.push('/'); 
+    } else {
+      throw new Error("Login succeeded but no user data was returned.");
+    }
+
   } catch (err) {
     errorMessage.value = err.message;
   } finally {

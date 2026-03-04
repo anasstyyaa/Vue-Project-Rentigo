@@ -45,9 +45,9 @@
       <div class="text-center pt-2">
         <Text size="sm" color="muted">
           Don't have an account? 
-          <span class="text-blue-600 font-bold cursor-pointer hover:underline" @click="$emit('toggle-auth')">
+          <router-link to="/register" class="text-blue-600 font-bold cursor-pointer hover:underline">
             Register here
-          </span>
+          </router-link>
         </Text>
       </div>
     </form>

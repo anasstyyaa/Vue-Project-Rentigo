@@ -10,7 +10,7 @@ export const Default = {
   args: {
     navigationLinks: [
       { name: 'Home', href: '/api/cars' },
-      { name: 'Profile', href: '/profile' },
+      { name: 'My Rentals', href: '/profile' },
     ],
   },
 };

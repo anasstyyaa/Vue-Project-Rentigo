@@ -4,6 +4,10 @@
       <Header />
     </template>
 
+    <div v-if="successMessage" class="mb-4 p-3 bg-green-100 text-green-700 rounded-lg text-sm text-center">
+      {{ successMessage }}
+    </div>
+
     <template #form>
       <LoginForm 
         :loading="isLoading" 
@@ -15,50 +19,57 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from "vue-router";
-import { post } from "../../../utils/api.js";
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from "vue-router";
+import axios, { setAuthToken } from '../../../utils/axios.js';
 
 import AuthTemplate from '../../templates/AuthTemplate/AuthTemplate.vue';
 import Header from '../../organisms/Header/Header.vue';
-import LoginForm from '@/components/organisms/LoginForm/LoginForm.vue';
+import LoginForm from '../../organisms/LoginForm/LoginForm.vue';
 
 const router = useRouter();
+const route = useRoute();
 const isLoading = ref(false);
 const errorMessage = ref('');
+const successMessage = ref('');
 
-const handleLogin = async (data) => {
+const handleLogin = async (loginData) => {
   isLoading.value = true;
   errorMessage.value = null;
 
   try { 
-    const response = await post("/api/login", {
-      email: data.email,
-      password: data.password
+    const response = await axios.post('/api/login', {
+      email: loginData.email, 
+      password: loginData.password,
     });
 
-    const result = await response.json();
+    const result = response.data;
 
-    if (!response.ok) {
-      throw new Error(result.error || result.message || "Login failed");
-    }
+    if (result.token) {
+      setAuthToken(result.token);
 
-    const loggedInUser = result.user; 
-    
-    if (loggedInUser) {
-      console.log("Found user:", loggedInUser.firstName);
+      if (result.user) {
+        localStorage.setItem('user', JSON.stringify(result.user));
+        console.log("Found user:", result.user.Username);
+      }
 
-      localStorage.setItem('user', JSON.stringify(loggedInUser));
-
-      router.push('/'); 
+      router.push('/');
     } else {
-      throw new Error("Login succeeded but no user data was returned.");
+      errorMessage.value = 'No token received from server';
     }
 
-  } catch (err) {
-    errorMessage.value = err.message;
-  } finally {
-    isLoading.value = false;
-  }
+    } catch (err) {
+      console.error('Login error:', err);
+      errorMessage.value = err.response?.data?.error || 'Login failed. Please check your credentials.';
+    } finally {
+      isLoading.value = false;
+    }
 };
+
+onMounted(() => {
+  if (route.query.registered === 'true') {
+    successMessage.value = "Registration successful! Please log in.";
+  }
+});
+
 </script>

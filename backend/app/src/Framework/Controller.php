@@ -23,6 +23,17 @@ class Controller
     }
 
     /**
+     * Gets and decodes JSON data from the request body
+     * 
+     * @return array|null Returns decoded JSON data as array or null if invalid
+     */
+    protected function getPostData(): ?array
+    {
+        $input = file_get_contents('php://input');
+        return json_decode($input, true);
+    }
+
+    /**
      * Maps POST data (JSON) to an instance of the specified class
      * 
      * @param string $className The fully qualified class name
@@ -30,8 +41,7 @@ class Controller
      */
     protected function mapPostDataToClass(string $className): ?object
     {
-        $input = file_get_contents('php://input');
-        $data = json_decode($input, true);
+        $data = $this->getPostData();
 
         $instance = new $className();
         

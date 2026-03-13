@@ -16,7 +16,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { post } from "../../../utils/api.js";
+import axios from '../../../utils/axios.js';
 import { useRouter } from "vue-router";
 
 import AuthTemplate from '../../templates/AuthTemplate/AuthTemplate.vue';
@@ -32,8 +32,7 @@ const handleRegister = async (data) => {
   errorMessage.value = '';
 
   try {
-    
-    const response = await post("/api/register", {
+    const response = await axios.post("/api/register", {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
@@ -41,15 +40,17 @@ const handleRegister = async (data) => {
       phoneNumber: data.phoneNumber
     });
 
-    const result = await response.json();
+    router.push({ path: '/login', query: { registered: 'true' } });
 
-    if (!response.ok) {
-      throw new Error(result.message || "Registration failed");
+  } catch (err) {
+    console.error('Registration error:', err);
+    
+    if (err.response && err.response.data) {
+      errorMessage.value = err.response.data.error || "Registration failed";
+    } else {
+      errorMessage.value = "An unexpected error occurred. Please try again.";
     }
 
-    router.push({ path: '/login', query: { registered: 'true' } });
-  } catch (err) {
-    errorMessage.value = err.message;
   } finally {
     isLoading.value = false;
   }

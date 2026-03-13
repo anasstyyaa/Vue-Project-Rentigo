@@ -20,9 +20,9 @@
       >
         <CarCard
           v-for="car in cars"
-          :key="car.id"
+          :key="car.carId"
           v-bind="car"
-          @click="$emit('car-click', car.id)"
+          @learn-more-click="$emit('learn-more-click', car.carId)"
         />
       </div>
       
@@ -80,9 +80,9 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['article-click']);
+const emit = defineEmits(['learn-more-click']);
 
-const handleArticleClick = (articleId) => {
-  emit('article-click', articleId);
+const handleLearnMoreClick = (carId) => {
+  emit('learn-more-click', carId);
 };
 </script>

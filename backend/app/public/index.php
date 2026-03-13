@@ -88,7 +88,8 @@ switch ($routeInfo[0]) {
 
             $repository = new \App\Repositories\UserRepository();
             $service = new \App\Services\UserService($repository);
-            $controller = new $class($service);
+            $authService = new \App\Services\AuthService();
+            $controller = new $class($service, $authService);
 
         }else {
             $controller = new $class();

@@ -16,15 +16,17 @@
   <CarArchive
     v-else
     :cars="cars"
-    @car-click="handleCarClick"
+    @learn-more-click="goToDetailPage"
   />
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router';
 import { ref, onMounted } from "vue";
 import CarArchive from "../../templates/CarArchive/CarArchive.vue";
 import { get } from "../../../utils/api.js";
 
+const router = useRouter();
 const cars = ref([]);
 const loading = ref(true);
 const error = ref(null);
@@ -49,8 +51,8 @@ const fetchCars = async () => {
   }
 };
 
-const handleCarClick = (id) => {
-  console.log("Viewing car details for ID:", id);
+const goToDetailPage = (id) => {
+  router.push({ path: `/cars/${id}` });
 };
 
 onMounted(fetchCars);

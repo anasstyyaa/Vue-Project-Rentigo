@@ -22,8 +22,11 @@
       <div class="flex items-center justify-between">
         <PriceDisplay :amount="pricePerDay" />
         
-        <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700">
-          Rent Now
+        <button 
+          @click="$emit('learn-more-click')"
+          class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+        >
+          Learn More
         </button>
       </div>
     </div>
@@ -34,6 +37,8 @@
 import AppImage from '../../atoms/AppImage/AppImage.vue';
 import PriceDisplay from '../../atoms/PriceDisplay/PriceDisplay.vue';
 import CarSpecs from '../../molecules/CarSpecs/CarSpecs.vue';
+
+const emit = defineEmits(['learn-more-click']);
 
 defineProps({
   brand: { type: String, required: true },

@@ -9,6 +9,7 @@ class User
     public string $firstName = "";
     public string $lastName = "";
     public string $email = "";
+    public string $username = "";
     public string $phoneNumber = "";
     public string $passwordHash = ""; 
     public string $createdAt = "";

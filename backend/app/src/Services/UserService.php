@@ -15,6 +15,17 @@ class UserService implements IUserService
         $this->repository = $repository;
     }
 
+    public function getAll(): array
+    {
+        return $this->repository->getAll();
+
+        return array_map(function($user) {
+            unset($user['PasswordHash']); // avoid sending hash to the frontend 
+            $user['FullName'] = $user['FirstName'] . ' ' . $user['LastName'];
+            return $user;
+        }, $rawUsers);
+    }
+
     public function getByEmail(string $email): ?User
     {
         return $this->repository->getByEmail($email);
@@ -23,6 +34,11 @@ class UserService implements IUserService
     public function create(User $user): ?User
     {
         return $this->repository->create($user);
+    }
+
+    public function delete($id): bool 
+    {
+        return $this->repository->delete($id);
     }
 
     public function authenticate(string $email, string $password): ?User

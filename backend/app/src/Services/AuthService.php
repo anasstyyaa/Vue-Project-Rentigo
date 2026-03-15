@@ -98,9 +98,13 @@ class AuthService implements IAuthService
 
         $existingUser = $this->userRepository->getByEmail($user->email);
         if ($existingUser) {
-            throw new UserAlreadyExistsException(); // custom exception
+            throw new UserAlreadyExistsException(); 
         }
 
-        return $this->userRepository->create($user); // create user
+        return $this->userRepository->create($user); 
+    }
+
+    public function isAdmin(User $user): bool {
+        return $user->roleId === 2; 
     }
 }

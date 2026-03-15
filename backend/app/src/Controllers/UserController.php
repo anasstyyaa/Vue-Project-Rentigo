@@ -19,6 +19,30 @@ class UserController extends Controller
         $this->authService = $authService;
     }
 
+    public function index(){
+        try {
+            $users = $this->userService->getAll(); 
+            header ('Content-Type: application/json');
+            echo json_encode($users);
+
+        } catch (\Exception $e) {
+            header('Content-Type: application/json');
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            //return $this->sendErrorResponse('An error occurred while fetching users', 500);
+        }
+    }
+
+    public function delete($id){
+        try {
+            $success = $this->userService->delete($id);
+            header('Content-Type: application/json'); 
+            return json_encode(['success' => $success]);
+        } catch (\Exception $e) {
+            return $this->sendErrorResponse('An error occurred while deleting the user', 500);
+        }
+    }
+
     public function login()
     {
         try {
@@ -42,7 +66,7 @@ class UserController extends Controller
 
             return $this->sendSuccessResponse([
                 'user' => $userDTO,
-                'token' => $token
+                'token' => $token, 
             ]);
 
         } catch (\Exception $e) {
@@ -115,4 +139,6 @@ class UserController extends Controller
             return $this->sendErrorResponse('Internal server error', 500);
         }
     }
+
+
 }

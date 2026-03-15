@@ -9,6 +9,29 @@ use PDO;
 
 class UserRepository extends Repository implements IUserRepository 
 {
+    public function getAll(): array
+    {
+        $sql = "SELECT 
+                    UserId AS userId, 
+                    RoleId AS roleId, 
+                    Username AS username,
+                    FirstName AS firstName, 
+                    LastName AS lastName, 
+                    Email AS email, 
+                    PhoneNumber AS phoneNumber, 
+                    PasswordHash AS passwordHash, 
+                    CreatedAt AS createdAt, 
+                    IsActive AS isActive 
+                FROM Users
+                WHERE IsActive = 1";
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute();
+
+        $stmt->setFetchMode(PDO::FETCH_CLASS, User::class);
+        return $stmt->fetchAll();
+    }
+
     public function getByEmail(string $email): ?User
     {
         $sql = "SELECT 
@@ -81,5 +104,12 @@ class UserRepository extends Repository implements IUserRepository
         }
 
         return null;
+    }
+
+    public function delete($id): bool 
+    {
+        $sql = "UPDATE Users SET IsDeleted = 1 WHERE UserId = :id";
+        $stmt = $this->getConnection()->prepare($sql);
+        return $stmt->execute([':id' => $id]);
     }
 }

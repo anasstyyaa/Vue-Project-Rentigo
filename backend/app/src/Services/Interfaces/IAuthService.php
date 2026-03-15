@@ -11,4 +11,5 @@ interface IAuthService
     public function getUserFromToken(string $token): ?User;
     public function generateToken(User $user): string;
     public function validateToken(string $token): bool;
+    public function isAdmin(User $user): bool;
 }

@@ -3,11 +3,13 @@ import CarArchivePage from '../components/pages/CarArchivePage/CarArchivePage.vu
 import CarDetailPage from '../components/pages/CarDetailPage/CarDetailPage.vue';
 import RegisterPage from '../components/pages/RegisterPage/RegisterPage.vue';
 import LoginPage from '../components/pages/LoginPage/LoginPage.vue';
+import UserManagementPage from '../components/pages/UserManagementPage/UserManagementPage.vue';
 
 const routes = [
   { path: '/', component: CarArchivePage },
   { path: '/cars/:id', component: CarDetailPage, props: true},
   { path: '/register', component: RegisterPage },
+  { path: '/admin/users', component: UserManagementPage },
   { path: '/login', component: LoginPage }
 ];
 

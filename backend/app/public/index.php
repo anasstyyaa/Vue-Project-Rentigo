@@ -47,6 +47,10 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // users
     $r->addRoute('POST', '/api/login', ['App\Controllers\UserController', 'login']);
     $r->addRoute('POST', '/api/register', ['App\Controllers\UserController', 'register']);
+ 
+    // admin 
+    $r->addRoute('GET', '/api/users', ['App\Controllers\UserController', 'index']); 
+    $r->addRoute('DELETE', '/api/users/{id:\d+}', ['App\Controllers\UserController', 'delete']);
 });
 
 

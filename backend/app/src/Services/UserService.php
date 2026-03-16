@@ -20,10 +20,9 @@ class UserService implements IUserService
         return $this->repository->getAll();
 
         return array_map(function($user) {
-            unset($user['PasswordHash']); // avoid sending hash to the frontend 
-            $user['FullName'] = $user['FirstName'] . ' ' . $user['LastName'];
+            unset($user->passwordHash); // avoids passing password to the frontend 
             return $user;
-        }, $rawUsers);
+        }, $users);
     }
 
     public function getByEmail(string $email): ?User
@@ -33,6 +32,21 @@ class UserService implements IUserService
 
     public function create(User $user): ?User
     {
+        if (empty($user->email) || !filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+            throw new \Exception("A valid email is required.");
+        }
+
+        if (empty($user->firstName) || strlen($user->firstName) < 1) {
+            throw new \Exception("First name is too short.");
+        }
+
+        if ($this->repository->getByEmail($user->email)) {
+            throw new \Exception("Email already exists.");
+        }
+
+        if (!empty($user->passwordHash)) {
+            $user->passwordHash = password_hash($user->passwordHash, PASSWORD_BCRYPT);
+        }
         return $this->repository->create($user);
     }
 
@@ -41,22 +55,41 @@ class UserService implements IUserService
         return $this->repository->delete($id);
     }
 
-    public function authenticate(string $email, string $password): ?User
+    public function update(User $user): ?User
     {
-        $user = $this->repository->getByEmail($email);
-
-        if ($user && password_verify($password, $user->passwordHash)) {
-            unset($user->passwordHash);
-            return $user;
+        $existingUser = $this->repository->getById($user->userId);
+        if (!$existingUser) {
+            throw new \Exception("User not found.");
         }
 
-        return null;
-    }
+        if (empty($user->email)) {
+            throw new \Exception("Email cannot be empty.");
+        }
 
-    public function register(User $user): ?User
-    {
+        if (!empty($user->passwordHash)) { 
         $user->passwordHash = password_hash($user->passwordHash, PASSWORD_BCRYPT);
-
-        return $this->repository->create($user);
+        } else {
+            $user->passwordHash = $existingUser->passwordHash;
+        }
+        return $this->repository->update($user);
     }
+
+    // public function authenticate(string $email, string $password): ?User
+    // {
+    //     $user = $this->repository->getByEmail($email);
+
+    //     if ($user && password_verify($password, $user->passwordHash)) {
+    //         unset($user->passwordHash);
+    //         return $user;
+    //     }
+
+    //     return null;
+    // }
+
+    // public function register(User $user): ?User
+    // {
+    //     $user->passwordHash = password_hash($user->passwordHash, PASSWORD_BCRYPT);
+
+    //     return $this->repository->create($user);
+    // }
 }

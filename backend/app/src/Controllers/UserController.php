@@ -26,22 +26,50 @@ class UserController extends Controller
             echo json_encode($users);
 
         } catch (\Exception $e) {
-            header('Content-Type: application/json');
-            http_response_code(500);
-            echo json_encode(['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            //return $this->sendErrorResponse('An error occurred while fetching users', 500);
+            return $this->sendErrorResponse('An error occurred while fetching users', 500);
         }
     }
 
     public function delete($id){
         try {
             $success = $this->userService->delete($id);
+            if ($success) {
+            return $this->sendSuccessResponse(['message' => 'Deleted successfully']);
+            }
+            return $this->sendErrorResponse('User not found', 404);
             header('Content-Type: application/json'); 
             return json_encode(['success' => $success]);
         } catch (\Exception $e) {
-            return $this->sendErrorResponse('An error occurred while deleting the user', 500);
+            return $this->sendErrorResponse($e->getMessage(), 500);
         }
     }
+
+    public function update($id){
+        try {
+            $user = $this->mapPostDataToClass(User::class);
+            $user->userId = $id; 
+            $updatedUser = $this->userService->update($user);
+
+            if ($updatedUser) {
+                return $this->sendSuccessResponse($updatedUser);
+            } else {
+                return $this->sendErrorResponse('User not found', 404);
+            }
+        } catch (\Exception $e) {
+            return $this->sendErrorResponse($e->getMessage(), 500);
+        }
+    }
+
+    public function create(){
+        try {
+            $user = $this->mapPostDataToClass(User::class);
+            $created = $this->userService->create($user);
+            return $this->sendSuccessResponse($created, 201);
+        } catch (\Exception $e) {
+            return $this->sendErrorResponse($e->getMessage(), 500);
+        }
+    }
+
 
     public function login()
     {
@@ -55,7 +83,7 @@ class UserController extends Controller
                 return $this->sendErrorResponse('Email and password are required', 400);
             }
 
-            $user = $this->userService->authenticate($email, $password);
+            $user = $this->authService->authenticate($email, $password);
 
             if (!$user) {
                 return ($this->sendErrorResponse('Invalid email or password', 401));
@@ -93,7 +121,7 @@ class UserController extends Controller
 
             $user->roleId = 1; // Default to regular user role
 
-            $createdUser = $this->userService->register($user);
+            $createdUser = $this->authService->register($user);
 
             if ($createdUser) {
                 return $this->sendSuccessResponse($createdUser, 201);

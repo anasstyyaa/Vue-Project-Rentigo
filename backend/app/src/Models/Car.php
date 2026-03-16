@@ -21,4 +21,4 @@ class Car
     public ?string $image = null;
 }
 
-?>
+

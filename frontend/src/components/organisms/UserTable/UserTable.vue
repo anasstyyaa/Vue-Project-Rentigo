@@ -21,7 +21,7 @@
 
         <UserTableRow 
           v-for="user in users" 
-          :key="user.UserId" 
+          :key="user.userId" 
           :user="user"
           @edit="$emit('edit', $event)"
           @delete="$emit('delete', $event)"

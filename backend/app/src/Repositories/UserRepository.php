@@ -69,7 +69,7 @@ class UserRepository extends Repository implements IUserRepository
                     CreatedAt AS createdAt, 
                     IsActive AS isActive 
                 FROM Users
-                WHERE UserId = :id AND IsDeleted = 0";
+                WHERE UserId = :id AND isActive = 1";
 
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute([':id' => $id]);
@@ -108,8 +108,42 @@ class UserRepository extends Repository implements IUserRepository
 
     public function delete($id): bool 
     {
-        $sql = "UPDATE Users SET IsDeleted = 1 WHERE UserId = :id";
+        $sql = "UPDATE Users SET IsActive = 0 WHERE UserId = :id";
         $stmt = $this->getConnection()->prepare($sql);
         return $stmt->execute([':id' => $id]);
+    }
+
+    public function update(User $user): ?User
+    {
+        $sql = "UPDATE Users SET 
+                    RoleId = :roleId, 
+                    Username = :username, 
+                    FirstName = :firstName, 
+                    LastName = :lastName, 
+                    Email = :email, 
+                    PhoneNumber = :phoneNumber, 
+                    PasswordHash = :passwordHash, 
+                    IsActive = :isActive
+                WHERE UserId = :userId";
+
+        $stmt = $this->getConnection()->prepare($sql);
+        $result = $stmt->execute([
+            ':roleId' => $user->roleId,
+            ':username' => $user->username,
+            ':firstName' => $user->firstName,
+            ':lastName' => $user->lastName,
+            ':email' => $user->email,
+            ':phoneNumber' => $user->phoneNumber,
+            ':passwordHash' => $user->passwordHash,
+            ':isActive' => (int)$user->isActive,
+            ':userId' => $user->userId
+        ]);
+
+        if ($result) {
+            unset($user->passwordHash); // never returning the password to the frontend 
+            return $user;
+        }
+
+        return null;
     }
 }

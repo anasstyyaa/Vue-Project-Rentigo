@@ -18,7 +18,7 @@
     </template>
 
     <template #header-left>
-      <h1 class="text-xl font-bold text-gray-800">User Management</h1>
+      <h1 class="text-xl font-bold text-gray-800">Car Management</h1>
     </template>
 
     <template #header-right>
@@ -27,14 +27,14 @@
 
     <template #main-content>
       <div class="mb-6 flex justify-between items-center">
-        <p class="text-gray-600">Overview of all registered users and their status.</p>
+        <p class="text-gray-600">Overview of all registered cars and their status.</p>
         <button @click="openCreateModal" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
-          + Add User
+          + Add Car
         </button>
       </div>
 
-      <UserTable 
-        :users="users" 
+      <CarTable 
+        :cars="cars" 
         :loading="isLoading"
         @edit="openEditModal"
         @delete="handleDelete"
@@ -43,12 +43,12 @@
       <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
         <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
           <h2 class="text-xl font-bold mb-4">
-            {{ editingUser ? 'Edit User' : 'Create New User' }}
+            {{ editingCar ? 'Edit Car' : 'Create New Car' }}
           </h2>
           
           <EntityForm 
-            :schema="userSchema" 
-            :initialData="editingUser || {}" 
+            :schema="carSchema" 
+            :initialData="editingCar || {}" 
             @submit="handleFormSubmit" 
             @cancel="closeModal" 
           />
@@ -63,51 +63,58 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from '../../../utils/axios';
 import AdminTemplate from '../../templates/AdminTemplate/AdminTemplate.vue';
-import UserTable from '../../organisms/UserTable/UserTable.vue';
+import CarTable from '../../organisms/CarTable/CarTable.vue';
 import EntityForm from '../../molecules/EntityForm/EntityForm.vue';
 
 const route = useRoute();
 const router = useRouter();
-const users = ref([]);
+const cars = ref([]);
 const isLoading = ref(false);
 
 const isModalOpen = ref(false);
-const editingUser = ref(null); // null means "create mode", object means "edit mode"
+const editingCar = ref(null); // null means "create mode", object means "edit mode"
 
 const adminName = computed(() => {
   const user = JSON.parse(localStorage.getItem('user'));
   return user ? user.firstName : 'Admin';
 });
 
-const userSchema = computed(() => {
-  const baseSchema = [
-    { key: 'firstName', label: 'First Name' },
-    { key: 'lastName', label: 'Last Name' },
-    { key: 'email', label: 'Email', type: 'email' },
-    { key: 'username', label: 'Username' }, 
-    { key: 'phoneNumber', label: 'Phone Number' }, 
-    { key: 'roleId', label: 'Is Admin', type: 'checkbox' }
+const carSchema = computed(() => {
+  return [
+    { key: 'brand', label: 'Brand', placeholder: 'e.g. BMW' },
+    { key: 'model', label: 'Model', placeholder: 'e.g. M4' },
+    { key: 'year', label: 'Year', type: 'number' },
+    { 
+      key: 'transmission', 
+      label: 'Transmission', 
+      options: [
+        { label: 'Automatic', value: 'Automatic' },
+        { label: 'Manual', value: 'Manual' }
+      ] 
+    },
+    { 
+      key: 'fuelType', 
+      label: 'Fuel Type', 
+      options: [
+        { label: 'Petrol', value: 'Petrol' },
+        { label: 'Diesel', value: 'Diesel' },
+        { label: 'Electric', value: 'Electric' },
+        { label: 'Hybrid', value: 'Hybrid' }
+      ] 
+    },
+    { key: 'pricePerDay', label: 'Price per Day ($)', type: 'number' },
+    { key: 'seats', label: 'Seats', type: 'number' },
+    { key: 'isAvailable', label: 'Available for Rent', type: 'checkbox' }
   ];
-
-  if (!editingUser.value) {
-    baseSchema.push({ 
-      key: 'passwordHash', 
-      label: 'Password', 
-      type: 'passwordHash', 
-      placeholder: 'Min 8 characters' 
-    });
-  }
-
-  return baseSchema;
 });
 
 const openCreateModal = () => {
-  editingUser.value = null;
+  editingCar.value = null;
   isModalOpen.value = true;
 };
 
-const openEditModal = (user) => {
-  editingUser.value = { ...user }; // clone the user 
+const openEditModal = (car) => {
+  editingCar.value = { ...car }; // clone the car 
   isModalOpen.value = true;
 };
 
@@ -115,14 +122,14 @@ const closeModal = () => {
   isModalOpen.value = false;
 };
 
-const fetchUsers = async () => {
+const fetchCars = async () => {
   isLoading.value = true;
   try {
-    const response = await axios.get('/api/users');
-    users.value = response.data;
+    const response = await axios.get('/api/cars');
+    cars.value = response.data;
   } catch (error) {
-    console.error("Error fetching users:", error);
-    alert("Failed to load users.");
+    console.error("Error fetching cars:", error);
+    alert("Failed to load cars.");
   } finally {
     isLoading.value = false;
   }
@@ -131,39 +138,40 @@ const fetchUsers = async () => {
 const handleFormSubmit = async (formData) => {
   const submissionData = {
     ...formData,
-    // if checked (true), role is 2 (Admin), else 1 (User)
-    roleId: formData.roleId === true || formData.roleId === 2 ? 2 : 1,
-    isActive: 1
+    year: parseInt(formData.year),
+    pricePerDay: parseFloat(formData.pricePerDay),
+    seats: parseInt(formData.seats),
+    isAvailable: formData.isAvailable ? 1 : 0
   };
 
   try {
-    const method = editingUser.value ? 'put' : 'post';
-    const url = editingUser.value 
-      ? `/api/users/${editingUser.value.userId}` 
-      : '/api/register';
+    const method = editingCar.value ? 'put' : 'post';
+    const url = editingCar.value 
+      ? `/api/cars/${editingCar.value.carId}` 
+      : '/api/cars';
 
     await axios[method](url, submissionData);
     
     closeModal();
-    await fetchUsers();
+    await fetchCars();
   } catch (error) {
     alert(error.response?.data?.error || "An error occurred while saving.");
   }
 };
 
-const handleDelete = async (userId) => {
-  if (confirm("Are you sure you want to delete this user?")) {
+const handleDelete = async (carId) => {
+  if (confirm("Are you sure you want to delete this car?")) {
     try {
-      await axios.delete(`/api/users/${userId}`);
-      users.value = users.value.filter(u => u.userId !== userId);
+      await axios.delete(`/api/cars/${carId}`);
+      cars.value = cars.value.filter(c => c.carId !== carId);
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error("Error deleting car:", error);
       alert("Delete failed.");
     }
   }
 };
 
-onMounted(fetchUsers);
+onMounted(fetchCars);
 
 const logout = () => {
   localStorage.removeItem('user');

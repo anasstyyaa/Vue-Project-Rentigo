@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Framework\Repository;
 use App\Repositories\Interfaces\ICarRepository;
 use App\Models\Car;
+use App\Models\CarImage;
 use PDO;
 
 class CarRepository extends Repository implements ICarRepository
@@ -86,7 +87,7 @@ class CarRepository extends Repository implements ICarRepository
         return null;
     }
 
-    public function update(Car $car): bool{
+    public function update(Car $car): bool {
         $sql = "UPDATE Cars SET 
                 brand = :brand, model = :model, year = :year, pricePerDay = :pricePerDay, 
                 transmission = :transmission, fuelType = :fuelType, seats = :seats, 
@@ -94,8 +95,7 @@ class CarRepository extends Repository implements ICarRepository
                 WHERE carId = :carId";
                 
         $stmt = $this->getConnection()->prepare($sql);
-
-        return $stmt->execute([
+        $updated = $stmt->execute([
             ':brand' => $car->brand,
             ':model' => $car->model,
             ':year' => $car->year,
@@ -108,6 +108,7 @@ class CarRepository extends Repository implements ICarRepository
             ':isAvailable' => (int)$car->isAvailable,
             ':carId' => $car->carId
         ]);
+        return $updated;
     }
 
     public function delete(int $id): bool{
@@ -115,6 +116,33 @@ class CarRepository extends Repository implements ICarRepository
 
         $stmt = $this->getConnection()->prepare($sql);
         return $stmt->execute([':id' => $id]);
+    }
+
+    public function addCarImage(CarImage $image): bool 
+    {
+        $sql = "INSERT INTO CarImages (CarId, ImageUrl, IsMainImage) 
+                VALUES (:carId, :imageUrl, :isMain)";
+        
+        $stmt = $this->getConnection()->prepare($sql);
+        
+        return $stmt->execute([
+            ':carId'    => $image->carId,
+            ':imageUrl' => $image->imageUrl,
+            ':isMain'   => $image->isMainImage
+        ]);
+    }
+
+    public function setMainImage(int $carId, int $imageId): bool {
+        //set all images for this car to NOT main
+        $sql1 = "UPDATE CarImages SET IsMainImage = 0 WHERE CarId = :carId";
+        $this->getConnection()->prepare($sql1)->execute([':carId' => $carId]);
+
+        //set the specific image to main
+        $sql2 = "UPDATE CarImages SET IsMainImage = 1 WHERE CarId = :carId AND ImageId = :imageId";
+        return $this->getConnection()->prepare($sql2)->execute([
+            ':carId' => $carId, 
+            ':imageId' => $imageId
+        ]);
     }
 
 }

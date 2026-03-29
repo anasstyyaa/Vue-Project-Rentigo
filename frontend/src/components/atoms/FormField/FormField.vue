@@ -4,8 +4,20 @@
       {{ label }}
     </label>
 
+    <div v-if="type === 'file'">
+      <input
+        :id="id"
+        type="file"
+        :multiple="multiple"
+        :accept="accept"
+        @change="handleFileChange"
+        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+      />
+      <p class="mt-1 text-xs text-gray-500">Selected: {{ fileCount }} / 4 photos</p>
+    </div>
+
     <select
-      v-if="options"
+      v-else-if="options"
       :id="id"
       :value="modelValue"
       @change="$emit('update:modelValue', $event.target.value)"
@@ -18,7 +30,7 @@
     </select>
 
     <input
-      v-else
+      v-else-if="type !== 'file'"
       :id="id"
       :type="type"
       :placeholder="placeholder"
@@ -37,10 +49,27 @@
     </label>
   </div>
 </template>
-
 <script setup>
-defineProps(['id', 'label', 'type', 'modelValue', 'placeholder', 'options']);
+import { ref } from 'vue';
+
+
+const props = defineProps([
+  'id', 'label', 'type', 'multiple', 'accept', 'modelValue', 'placeholder', 'options'
+]);
+
 const emit = defineEmits(['update:modelValue']);
+
+const fileCount = ref(0);
+
+const handleFileChange = (event) => {
+  const files = event.target.files;
+  if (!files) return;
+
+  fileCount.value = files.length;
+
+  const fileArray = Array.from(files);
+  emit('update:modelValue', fileArray);
+};
 
 const handleInput = (event) => {
   const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;

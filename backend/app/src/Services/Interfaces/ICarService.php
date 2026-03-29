@@ -3,6 +3,7 @@
 namespace App\Services\Interfaces;
 
 use App\Models\Car;
+use App\Models\CarImage;
 use App\Repositories\Interfaces\ICarRepository;
 
 interface ICarService
@@ -12,4 +13,6 @@ interface ICarService
     public function create(Car $car): ?Car;
     public function update(Car $car): bool;
     public function delete(int $id): bool;
+    public function handleImageUploads(int $carId, array $files): void;
+    public function addCarImage(CarImage $image): bool;
 }

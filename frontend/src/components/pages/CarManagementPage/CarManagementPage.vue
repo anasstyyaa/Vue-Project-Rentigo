@@ -1,34 +1,8 @@
 <template>
-  <AdminTemplate>
-    <template #sidebar-nav>
-        <router-link to="/" class="nav-link-back mb-4 flex items-center text-blue-400 hover:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Website
-        </router-link>
-
-        <router-link to="/admin/dashboard" class="nav-link">Dashboard</router-link>
-        <router-link to="/admin/users" class="nav-link active">Manage Users</router-link>
-        <router-link to="/admin/cars" class="nav-link">Manage Cars</router-link>
-    </template>
-
-    <template #sidebar-footer>
-      <button @click="logout" class="text-gray-400 hover:text-white transition-colors text-sm">Logout</button>
-    </template>
-
-    <template #header-left>
-      <h1 class="text-xl font-bold text-gray-800">Car Management</h1>
-    </template>
-
-    <template #header-right>
-      <div class="text-sm text-gray-500">Admin: <strong>{{ adminName }}</strong></div>
-    </template>
-
-    <template #main-content>
+  <AdminHeader title="Car Management">
       <div class="mb-6 flex justify-between items-center">
         <p class="text-gray-600">Overview of all registered cars and their status.</p>
-        <button @click="openCreateModal" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
+        <button @click="openCreateModal" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
           + Add Car
         </button>
       </div>
@@ -40,31 +14,34 @@
         @delete="handleDelete"
       />
 
-      <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
-          <h2 class="text-xl font-bold mb-4">
+      <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 flex items-start justify-center z-50 overflow-y-auto p-4 sm:p-6">
+        <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md my-auto h-auto max-h-[90vh] flex flex-col">
+          
+          <h2 class="text-xl font-bold mb-4 flex-shrink-0">
             {{ editingCar ? 'Edit Car' : 'Create New Car' }}
           </h2>
           
-          <EntityForm 
-            :schema="carSchema" 
-            :initialData="editingCar || {}" 
-            @submit="handleFormSubmit" 
-            @cancel="closeModal" 
-          />
+          <div class="overflow-y-auto pr-2 flex-grow custom-scrollbar">
+            <EntityForm 
+              :schema="carSchema" 
+              :initialData="editingCar || {}" 
+              @submit="handleFormSubmit" 
+              @cancel="closeModal" 
+            />
+          </div>
+
         </div>
       </div>
-    </template>
-  </AdminTemplate>
+  </AdminHeader>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from '../../../utils/axios';
-import AdminTemplate from '../../templates/AdminTemplate/AdminTemplate.vue';
 import CarTable from '../../organisms/CarTable/CarTable.vue';
 import EntityForm from '../../molecules/EntityForm/EntityForm.vue';
+import AdminHeader from '@/components/organisms/AdminHeader/AdminHeader.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -104,6 +81,13 @@ const carSchema = computed(() => {
     },
     { key: 'pricePerDay', label: 'Price per Day ($)', type: 'number' },
     { key: 'seats', label: 'Seats', type: 'number' },
+    { 
+      key: 'images', 
+      label: 'Vehicle Photos (Max 4)', 
+      type: 'file', 
+      multiple: true,
+      accept: 'image/*'
+    },
     { key: 'isAvailable', label: 'Available for Rent', type: 'checkbox' }
   ];
 });
@@ -134,28 +118,66 @@ const fetchCars = async () => {
     isLoading.value = false;
   }
 };
-
 const handleFormSubmit = async (formData) => {
-  const submissionData = {
-    ...formData,
-    year: parseInt(formData.year),
-    pricePerDay: parseFloat(formData.pricePerDay),
-    seats: parseInt(formData.seats),
-    isAvailable: formData.isAvailable ? 1 : 0
-  };
+  const data = new FormData();
+  
+  // 1. Identify if we are updating or creating
+  const isEdit = !!editingCar.value;
+  const carId = isEdit ? editingCar.value.carId : null;
+
+  // 2. Map all fields to FormData
+  // We loop the schema to ensure we get everything defined
+  carSchema.value.forEach(field => {
+    if (field.key === 'images') return; // Handled separately below
+    
+    let value = formData[field.key];
+    
+    // Handle specific type conversions for PHP
+    if (field.type === 'checkbox') {
+      value = value ? '1' : '0';
+    }
+    
+    if (value !== undefined && value !== null) {
+      data.append(field.key, value);
+    }
+  });
+
+  // 3. Handle Method Spoofing for Update
+  if (isEdit) {
+    data.append('_method', 'PUT');
+  }
+
+  // 4. Handle Images (Multiple)
+  if (formData.images && formData.images.length > 0) {
+    // If EntityForm gives you a FileList or Array
+    for (let i = 0; i < formData.images.length; i++) {
+      data.append('images[]', formData.images[i]);
+    }
+  }
 
   try {
-    const method = editingCar.value ? 'put' : 'post';
-    const url = editingCar.value 
-      ? `/api/cars/${editingCar.value.carId}` 
-      : '/api/cars';
-
-    await axios[method](url, submissionData);
+    isLoading.value = true;
     
+    // 5. Determine URL and Method
+    // We always use POST because of Multipart/FormData + _method spoofing
+    const url = isEdit ? `/api/cars/${carId}` : '/api/cars';
+    
+    await axios.post(url, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+
+    // 6. Success Feedback & Cleanup
     closeModal();
-    await fetchCars();
+    await fetchCars(); // Refresh the list
+    alert(isEdit ? "Car updated!" : "Car created!");
+    
   } catch (error) {
-    alert(error.response?.data?.error || "An error occurred while saving.");
+    console.error("Submission Error:", error.response?.data || error.message);
+    alert("Error saving car: " + (error.response?.data?.error || "Check console"));
+  } finally {
+    isLoading.value = false;
   }
 };
 

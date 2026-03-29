@@ -1,70 +1,43 @@
 <template>
-  <AdminTemplate>
-    <template #sidebar-nav>
-        <router-link to="/" class="nav-link-back mb-4 flex items-center text-blue-400 hover:text-white">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Website
-        </router-link>
+  <AdminHeader>
+    <div class="mb-6 flex justify-between items-center">
+      <p class="text-gray-600">Overview of all registered users and their status.</p>
+      <button @click="openCreateModal" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
+        + Add User
+      </button>
+    </div>
 
-        <router-link to="/admin/dashboard" class="nav-link">Dashboard</router-link>
-        <router-link to="/admin/users" class="nav-link active">Manage Users</router-link>
-        <router-link to="/admin/cars" class="nav-link">Manage Cars</router-link>
-    </template>
+    <UserTable 
+      :users="users" 
+      :loading="isLoading"
+      @edit="openEditModal"
+      @delete="handleDelete"
+    />
 
-    <template #sidebar-footer>
-      <button @click="logout" class="text-gray-400 hover:text-white transition-colors text-sm">Logout</button>
-    </template>
-
-    <template #header-left>
-      <h1 class="text-xl font-bold text-gray-800">User Management</h1>
-    </template>
-
-    <template #header-right>
-      <div class="text-sm text-gray-500">Admin: <strong>{{ adminName }}</strong></div>
-    </template>
-
-    <template #main-content>
-      <div class="mb-6 flex justify-between items-center">
-        <p class="text-gray-600">Overview of all registered users and their status.</p>
-        <button @click="openCreateModal" class="bg-blue-600 text-white px-4 py-2 rounded-lg">
-          + Add User
-        </button>
+    <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4">
+          {{ editingUser ? 'Edit User' : 'Create New User' }}
+        </h2>
+        
+        <EntityForm 
+          :schema="userSchema" 
+          :initialData="editingUser || {}" 
+          @submit="handleFormSubmit" 
+          @cancel="closeModal" 
+        />
       </div>
-
-      <UserTable 
-        :users="users" 
-        :loading="isLoading"
-        @edit="openEditModal"
-        @delete="handleDelete"
-      />
-
-      <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
-          <h2 class="text-xl font-bold mb-4">
-            {{ editingUser ? 'Edit User' : 'Create New User' }}
-          </h2>
-          
-          <EntityForm 
-            :schema="userSchema" 
-            :initialData="editingUser || {}" 
-            @submit="handleFormSubmit" 
-            @cancel="closeModal" 
-          />
-        </div>
-      </div>
-    </template>
-  </AdminTemplate>
+    </div>
+  </AdminHeader>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from '../../../utils/axios';
-import AdminTemplate from '../../templates/AdminTemplate/AdminTemplate.vue';
 import UserTable from '../../organisms/UserTable/UserTable.vue';
 import EntityForm from '../../molecules/EntityForm/EntityForm.vue';
+import AdminHeader from '@/components/organisms/AdminHeader/AdminHeader.vue';
 
 const route = useRoute();
 const router = useRouter();

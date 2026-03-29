@@ -1,6 +1,6 @@
 <template>
   <div class="max-w-sm overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md">
-    <AppImage :src="image" :alt="`${brand} ${model}`" aspect="video" />
+    <AppImage :src="fullImageUrl" :alt="`${brand} ${model}`" aspect="video" />
 
     <div class="p-4">
       <div class="mb-2">
@@ -34,13 +34,14 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import AppImage from '../../atoms/AppImage/AppImage.vue';
 import PriceDisplay from '../../atoms/PriceDisplay/PriceDisplay.vue';
 import CarSpecs from '../../molecules/CarSpecs/CarSpecs.vue';
 
 const emit = defineEmits(['learn-more-click']);
 
-defineProps({
+const props = defineProps({
   brand: { type: String, required: true },
   model: { type: String, required: true },
   year: { type: [Number, String], required: true },
@@ -49,5 +50,14 @@ defineProps({
   transmission: { type: String, required: true },
   fuelType: { type: String, required: true },
   seats: { type: [Number, String], required: true },
+});
+
+// 2. Now props.image will work inside here
+const fullImageUrl = computed(() => {
+  if (!props.image) return '/placeholder-car.png'; 
+  
+  if (props.image.startsWith('http')) return props.image;
+  
+  return `http://localhost/${props.image}`;
 });
 </script>

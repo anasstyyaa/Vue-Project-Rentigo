@@ -16,3 +16,12 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # On container start, install dependencies if vendor is missing, then start php-fpm
 CMD ["sh", "-lc", "[ -f vendor/autoload.php ] || composer install --no-interaction --no-progress; exec php-fpm"]
+
+RUN echo "upload_max_filesize=100M" > /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "max_file_uploads=20" >> /usr/local/etc/php/conf.d/uploads.ini
+
+
+RUN mkdir -p /app/public/uploads/cars \
+    && chown -R www-data:www-data /app/public/uploads \
+    && chmod -R 775 /app/public/uploads

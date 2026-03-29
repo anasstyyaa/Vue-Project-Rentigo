@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Car;
+use App\Models\CarImage;
 use App\Repositories\Interfaces\ICarRepository;
 use App\Services\Interfaces\ICarService;
 
@@ -41,5 +42,39 @@ class CarService implements ICarService
     public function delete(int $id): bool
     {
         return $this->repository->delete($id);
+    }
+
+    public function handleImageUploads(int $carId, array $files): void
+    {
+        $uploadDir = '/app/public/uploads/cars/';
+        $fileCount = is_array($files['name']) ? count($files['name']) : 0;
+
+        for ($i = 0; $i < $fileCount; $i++) {
+
+            if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+                error_log("Upload error for file $i: Code " . $files['error'][$i]);
+                continue;
+            }
+
+            $fileName = time() . '_' . basename($files['name'][$i]);
+            $targetFile = $uploadDir . $fileName;
+
+            // 3. Perform the move
+            if (move_uploaded_file($files['tmp_name'][$i], $targetFile)) {
+                $carImage = new CarImage();
+                $carImage->carId = $carId;
+                $carImage->imageUrl = 'uploads/cars/' . $fileName;
+                $carImage->isMainImage = ($i === 0 ? 1 : 0);
+
+                $this->repository->addCarImage($carImage);
+            } else {
+                error_log("CRITICAL: Could not move file to $targetFile. Check folder permissions!");
+            }
+        }
+    }
+
+    public function addCarImage(CarImage $image): bool 
+    {
+        return $this->repository->addCarImage($image);
     }
 }

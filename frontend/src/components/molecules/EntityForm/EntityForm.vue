@@ -5,9 +5,11 @@
         :id="field.key"
         :label="field.label"
         :type="field.type || 'text'"
-        v-model="formData[field.key]"
+        :modelValue="formData[field.key]"
+        @update:modelValue="val => handleFieldUpdate(field.key, val)"
         :placeholder="field.placeholder"
         :options="field.options"
+        :multiple="field.multiple" 
       />
     </div>
     
@@ -39,9 +41,14 @@ const updateFormData = (data) => {
   formData.value = data ? { ...data } : {};
 };
 
+const handleFieldUpdate = (key, value) => {
+  formData.value[key] = value;
+};
+
 updateFormData(props.initialData);
 
 watch(() => props.initialData, (newVal) => {
   updateFormData(newVal);
 }, { deep: true });
+
 </script>

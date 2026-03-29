@@ -17,7 +17,7 @@ class Car
     public bool $isAvailable = true;
     public string $createdAt = "";
     public bool $isDeleted = false;
-    public array $images = [];
+    public array $images = []; 
     public ?string $image = null;
 }
 

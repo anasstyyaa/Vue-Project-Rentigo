@@ -22,7 +22,7 @@ class CarRepository extends Repository implements ICarRepository
                     c.Seats AS seats, 
                     c.Color AS color, 
                     c.IsAvailable AS isAvailable,
-                    (SELECT ImageUrl FROM CarImages WHERE CarId = c.CarId ORDER BY IsMainImage DESC LIMIT 1) AS image
+                    (SELECT ImageUrl FROM CarImages WHERE CarId = c.CarId ORDER BY IsMainImage DESC LIMIT 1) AS mainImage
                 FROM Cars c
                 WHERE c.IsDeleted = 0";
 

@@ -27,18 +27,15 @@ import { ref, watch } from 'vue';
 import ImageAtom from '../../atoms/AppImage/AppImage.vue';
 
 const props = defineProps({
-  images: {
-    type: Array,
-    required: true,
-    default: () => []
-  }
+  images: { type: Array, required: true, default: () => [] },
+  mainImage: { type: String, default: '' } 
 });
 
-const activeImage = ref(props.images[0] || '');
+const activeImage = ref(props.mainImage || props.images[0] || '');
 
 watch(() => props.images, (newImages) => {
-  if (newImages && newImages.length > 0) {
-    activeImage.value = newImages[0];
+  if (!activeImage.value && newImages.length > 0) {
+    activeImage.value = props.mainImage || newImages[0];
   }
 }, { immediate: true });
 

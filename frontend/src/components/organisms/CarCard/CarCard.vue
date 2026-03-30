@@ -45,19 +45,19 @@ const props = defineProps({
   brand: { type: String, required: true },
   model: { type: String, required: true },
   year: { type: [Number, String], required: true },
-  image: { type: String, required: true },
+  mainImage: { type: String, required: true },
   pricePerDay: { type: [Number, String], required: true },
   transmission: { type: String, required: true },
   fuelType: { type: String, required: true },
   seats: { type: [Number, String], required: true },
 });
 
-// 2. Now props.image will work inside here
+
 const fullImageUrl = computed(() => {
-  if (!props.image) return '/placeholder-car.png'; 
+  if (!props.mainImage) return '/placeholder-car.png'; 
   
-  if (props.image.startsWith('http')) return props.image;
+  if (props.mainImage.startsWith('http')) return props.mainImage;
   
-  return `http://localhost/${props.image}`;
+  return `http://localhost/${props.mainImage}`;
 });
 </script>

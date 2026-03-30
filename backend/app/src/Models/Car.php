@@ -17,7 +17,6 @@ class Car
     public bool $isAvailable = true;
     public string $createdAt = "";
     public bool $isDeleted = false;
-    // public ?string $image = null;      // used in getAll()
     public ?string $mainImage = null;  // used in getById()
     public array $images = [];         // used in getById()
 }

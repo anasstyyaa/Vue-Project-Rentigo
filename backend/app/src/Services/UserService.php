@@ -30,6 +30,11 @@ class UserService implements IUserService
         return $this->repository->getByEmail($email);
     }
 
+    public function getById(int $id): User
+    {
+        return $this->repository->getById($id);
+    }
+
     public function create(User $user): ?User
     {
         if (empty($user->email) || !filter_var($user->email, FILTER_VALIDATE_EMAIL)) {

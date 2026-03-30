@@ -169,5 +169,27 @@ class UserController extends Controller
         }
     }
 
+    public function getProfile() {
+        try {
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+                return $this->sendErrorResponse("No token provided", 401);
+            }
+
+            $token = $matches[1];
+            $user = $this->authService->getUserFromToken($token);
+
+            if (!$user) {
+                return $this->sendErrorResponse("Invalid or expired token", 401);
+            }
+
+            $userDTO = new UserDTO($user);
+            return $this->sendSuccessResponse($userDTO->toArray());
+            
+        } catch (\Exception $e) {
+            return $this->sendErrorResponse($e->getMessage(), 500);
+        }
+    }
+
 
 }

@@ -8,24 +8,24 @@
  */
 
 // CORS headers for localhost requests
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (preg_match('/^https?:\/\/(localhost|127\.0\.0\.1|::1)(:\d+)?$/', $origin)) {
-    header('Access-Control-Allow-Origin: ' . $origin);
-    // Specifies which HTTP methods are allowed when accessing the resource from the origin
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    // Specifies which HTTP headers can be used when making the actual request
-    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override');
-    // Allows cookies and authentication credentials to be sent with cross-origin requests
-    header('Access-Control-Allow-Credentials: true');
-    // Specifies how long (in seconds) the browser can cache the preflight response (24 hours)
-    header('Access-Control-Max-Age: 86400');
-}
+// $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+// if (preg_match('/^https?:\/\/(localhost|127\.0\.0\.1|::1)(:\d+)?$/', $origin)) {
+//     header('Access-Control-Allow-Origin: ' . $origin);
+//     // Specifies which HTTP methods are allowed when accessing the resource from the origin
+//     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+//     // Specifies which HTTP headers can be used when making the actual request
+//     header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-HTTP-Method-Override, Accept, Origin');
+//     // Allows cookies and authentication credentials to be sent with cross-origin requests
+//     header('Access-Control-Allow-Credentials: true');
+//     // Specifies how long (in seconds) the browser can cache the preflight response (24 hours)
+//     header('Access-Control-Max-Age: 86400');
+// }
 
-// Handle preflight OPTIONS requests
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+// // Handle preflight OPTIONS requests
+// if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+//     http_response_code(200);
+//     exit;
+// }
 
 require __DIR__ . '/../vendor/autoload.php';
 
@@ -49,6 +49,12 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // users
     $r->addRoute('POST', '/api/login', ['App\Controllers\UserController', 'login']);
     $r->addRoute('POST', '/api/register', ['App\Controllers\UserController', 'register']);
+    $r->addRoute('GET', '/api/profile', ['App\Controllers\UserController', 'getProfile']);
+
+    // rentals 
+    $r->addRoute('GET', '/api/my-bookings', ['App\Controllers\RentalController', 'getMyBookings']);
+    $r->addRoute('POST', '/api/bookings', ['App\Controllers\RentalController', 'store']);
+    $r->addRoute('POST', '/api/bookings/{id}/cancel', ['App\Controllers\RentalController', 'cancel']);
  
     // admin 
     $r->addRoute('GET', '/api/users', ['App\Controllers\UserController', 'index']); 
@@ -110,7 +116,14 @@ switch ($routeInfo[0]) {
             $authService = new \App\Services\AuthService();
             $controller = new $class($service, $authService);
 
-        }else {
+        } elseif ($class === 'App\Controllers\RentalController') {
+            $repository = new \App\Repositories\RentalRepository();
+            $carRepository = new \App\Repositories\CarRepository();
+            $service = new \App\Services\RentalService($repository, $carRepository);
+            $authService = new \App\Services\AuthService();
+            $controller = new $class($service, $authService);
+        
+        } else {
             $controller = new $class();
         }
         

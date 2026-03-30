@@ -46,6 +46,7 @@ class UserController extends Controller
 
     public function update($id){
         try {
+            
             $user = $this->mapPostDataToClass(User::class);
             $user->userId = $id; 
             $updatedUser = $this->userService->update($user);

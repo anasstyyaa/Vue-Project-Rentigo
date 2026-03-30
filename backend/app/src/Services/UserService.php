@@ -19,10 +19,10 @@ class UserService implements IUserService
     {
         return $this->repository->getAll();
 
-        return array_map(function($user) {
-            unset($user->passwordHash); // avoids passing password to the frontend 
-            return $user;
-        }, $users);
+        // return array_map(function($user) {
+        //     unset($user->passwordHash); // avoids passing password to the frontend 
+        //     return $user;
+        // }, $users);
     }
 
     public function getByEmail(string $email): ?User
@@ -44,6 +44,10 @@ class UserService implements IUserService
             throw new \Exception("Email already exists.");
         }
 
+        if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] === UPLOAD_ERR_OK) {
+            $user->profilePicture = $this->handleFileUpload($_FILES['profilePicture']);
+        }
+
         if (!empty($user->passwordHash)) {
             $user->passwordHash = password_hash($user->passwordHash, PASSWORD_BCRYPT);
         }
@@ -62,34 +66,60 @@ class UserService implements IUserService
             throw new \Exception("User not found.");
         }
 
+        $newFileUploaded = false;
+
+        if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] === UPLOAD_ERR_OK) {
+            $uploadedPath = $this->handleFileUpload($_FILES['profilePicture']);
+            if ($uploadedPath) {
+                $user->profilePicture = $uploadedPath;
+                $newFileUploaded = true; 
+            }
+        } 
+        
+        if (!$newFileUploaded) {
+            if ($user->profilePicture === '[object File]' || empty($user->profilePicture)) {
+                $user->profilePicture = $existingUser->profilePicture;
+            }
+        }
+
         if (empty($user->email)) {
             throw new \Exception("Email cannot be empty.");
         }
 
         if (!empty($user->passwordHash)) { 
-        $user->passwordHash = password_hash($user->passwordHash, PASSWORD_BCRYPT);
+            $user->passwordHash = password_hash($user->passwordHash, PASSWORD_BCRYPT);
         } else {
             $user->passwordHash = $existingUser->passwordHash;
         }
+
         return $this->repository->update($user);
     }
 
-    // public function authenticate(string $email, string $password): ?User
-    // {
-    //     $user = $this->repository->getByEmail($email);
+    private function handleFileUpload(array $file): ?string
+    {
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            error_log("Upload error code: " . $file['error']);
+            return null;
+        }
 
-    //     if ($user && password_verify($password, $user->passwordHash)) {
-    //         unset($user->passwordHash);
-    //         return $user;
-    //     }
+        $baseDir = realpath(__DIR__ . '/../../public');
+        $uploadDir = $baseDir . '/uploads/users/';
 
-    //     return null;
-    // }
+        
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
 
-    // public function register(User $user): ?User
-    // {
-    //     $user->passwordHash = password_hash($user->passwordHash, PASSWORD_BCRYPT);
+        $fileName = time() . '_' . basename($file['name']);
+        $targetPath = $uploadDir . $fileName;
 
-    //     return $this->repository->create($user);
-    // }
+        if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+            return 'uploads/users/' . $fileName;
+        } else {
+            error_log("Failed to move file to: " . $targetPath);
+        }
+
+        return null;
+    }
+
 }

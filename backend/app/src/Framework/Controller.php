@@ -29,10 +29,19 @@ class Controller
      */
     protected function getPostData(): ?array
     {
-        $input = file_get_contents('php://input');
-        return json_decode($input, true);
-    }
+        // checks if it's a standard Form/Multipart submission
+        if (!empty($_POST)) {
+            return $_POST;
+        }
 
+        //for standard API calls
+        $input = file_get_contents('php://input');
+        if (empty($input)) {
+            return [];
+        }
+        
+        return json_decode($input, true) ?? [];
+    }
     /**
      * Maps POST data (JSON) to an instance of the specified class
      * 
@@ -43,10 +52,18 @@ class Controller
     {
         $data = $this->getPostData();
 
+        if (empty($data)) {
+            return new $className();
+        }
+
         $instance = new $className();
         
         foreach ($data as $key => $value) {
             if (property_exists($instance, $key)) {
+                if ($key === 'profilePicture' && ($value === '[object File]' || empty($value))) {
+                    continue; 
+                }
+
                 $instance->$key = $value;
             }
         }

@@ -14,18 +14,24 @@
       @delete="handleDelete"
     />
 
-    <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
-        <h2 class="text-xl font-bold mb-4">
-          {{ editingUser ? 'Edit User' : 'Create New User' }}
-        </h2>
+    <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-xl shadow-xl w-full max-w-md flex flex-col max-h-[90vh]">
         
-        <EntityForm 
-          :schema="userSchema" 
-          :initialData="editingUser || {}" 
-          @submit="handleFormSubmit" 
-          @cancel="closeModal" 
-        />
+        <div class="p-6 border-b border-gray-100">
+          <h2 class="text-xl font-bold">
+            {{ editingUser ? 'Edit User' : 'Create New User' }}
+          </h2>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto p-6">
+          <EntityForm 
+            :schema="userSchema" 
+            :initialData="editingUser || {}" 
+            @submit="handleFormSubmit" 
+            @cancel="closeModal" 
+          />
+        </div>
+
       </div>
     </div>
   </AdminHeader>
@@ -57,6 +63,12 @@ const userSchema = computed(() => {
     { key: 'firstName', label: 'First Name' },
     { key: 'lastName', label: 'Last Name' },
     { key: 'email', label: 'Email', type: 'email' },
+    { 
+      key: 'profilePicture', 
+      label: 'Profile Picture', 
+      type: 'file', 
+      accept: 'image/*' 
+    },
     { key: 'username', label: 'Username' }, 
     { key: 'phoneNumber', label: 'Phone Number' }, 
     { key: 'roleId', label: 'Is Admin', type: 'checkbox' }
@@ -102,25 +114,48 @@ const fetchUsers = async () => {
 };
 
 const handleFormSubmit = async (formData) => {
-  const submissionData = {
-    ...formData,
-    // if checked (true), role is 2 (Admin), else 1 (User)
-    roleId: formData.roleId === true || formData.roleId === 2 ? 2 : 1,
-    isActive: 1
-  };
+  const isEdit = !!editingUser.value;
+  const submissionData = new FormData();
+
+  Object.keys(formData).forEach(key => {
+    const value = formData[key];
+    
+    if (key === 'profilePicture') {
+      const file = value instanceof File ? value : (value && value.raw instanceof File ? value.raw : null);
+      
+      if (file) {
+        submissionData.append('profilePicture', file);
+      } else if (typeof value === 'string' && value !== '[object File]') {
+        submissionData.append('profilePicture', value);
+      }
+    } else if (value !== undefined && value !== null) {
+      if (key === 'roleId') {
+        submissionData.append(key, (value === true || value === 2) ? '2' : '1');
+      } else {
+        submissionData.append(key, value);
+      }
+    }
+  });
+
+  for (let pair of submissionData.entries()) {
+    console.log(pair[0] + ': ', pair[1]);
+  }
 
   try {
-    const method = editingUser.value ? 'put' : 'post';
-    const url = editingUser.value 
-      ? `/api/users/${editingUser.value.userId}` 
-      : '/api/register';
+    let url = isEdit ? `/api/users/${editingUser.value.userId}` : '/api/register';
+    await axios({
+      method: 'post',
+      url: url,
+      data: submissionData,
+      headers: {
+        'Content-Type': undefined 
+      }
+    });
 
-    await axios[method](url, submissionData);
-    
     closeModal();
     await fetchUsers();
   } catch (error) {
-    alert(error.response?.data?.error || "An error occurred while saving.");
+    console.error("Server Response:", error.response?.data);
   }
 };
 

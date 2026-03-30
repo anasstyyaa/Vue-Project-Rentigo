@@ -18,6 +18,7 @@ class UserRepository extends Repository implements IUserRepository
                     FirstName AS firstName, 
                     LastName AS lastName, 
                     Email AS email, 
+                    ProfilePicture AS profilePicture,
                     PhoneNumber AS phoneNumber, 
                     PasswordHash AS passwordHash, 
                     CreatedAt AS createdAt, 
@@ -41,6 +42,7 @@ class UserRepository extends Repository implements IUserRepository
                     FirstName AS firstName, 
                     LastName AS lastName, 
                     Email AS email, 
+                    ProfilePicture AS profilePicture,
                     PhoneNumber AS phoneNumber, 
                     PasswordHash AS passwordHash, 
                     CreatedAt AS createdAt, 
@@ -64,6 +66,7 @@ class UserRepository extends Repository implements IUserRepository
                     FirstName AS firstName, 
                     LastName AS lastName, 
                     Email AS email, 
+                    ProfilePicture AS profilePicture, 
                     PhoneNumber AS phoneNumber, 
                     PasswordHash AS passwordHash, 
                     CreatedAt AS createdAt, 
@@ -82,8 +85,8 @@ class UserRepository extends Repository implements IUserRepository
 
     public function create(User $user): ?User
     {
-        $sql = "INSERT INTO Users (RoleId, Username, FirstName, LastName, Email, PhoneNumber, PasswordHash, IsActive) 
-                VALUES (:roleId, :username, :firstName, :lastName, :email, :phoneNumber, :passwordHash, :isActive)";
+        $sql = "INSERT INTO Users (RoleId, Username, FirstName, LastName, Email, ProfilePicture, PhoneNumber, PasswordHash, IsActive) 
+                VALUES (:roleId, :username, :firstName, :lastName, :email, :profilePicture, :phoneNumber, :passwordHash, :isActive)";
 
         $stmt = $this->getConnection()->prepare($sql);
         $result = $stmt->execute([
@@ -92,9 +95,10 @@ class UserRepository extends Repository implements IUserRepository
             ':firstName' => $user->firstName,
             ':lastName' => $user->lastName,
             ':email' => $user->email,
+            ':profilePicture' => $user->profilePicture,
             ':phoneNumber' => $user->phoneNumber,
             ':passwordHash' => $user->passwordHash,
-            ':isActive' => (int)$user->isActive
+            ':isActive' => ($user->isActive === 'true' || $user->isActive === true || $user->isActive === 1) ? 1 : 0,
         ]);
 
         if ($result) {
@@ -121,6 +125,7 @@ class UserRepository extends Repository implements IUserRepository
                     FirstName = :firstName, 
                     LastName = :lastName, 
                     Email = :email, 
+                    ProfilePicture = :profilePicture,
                     PhoneNumber = :phoneNumber, 
                     PasswordHash = :passwordHash, 
                     IsActive = :isActive
@@ -133,9 +138,10 @@ class UserRepository extends Repository implements IUserRepository
             ':firstName' => $user->firstName,
             ':lastName' => $user->lastName,
             ':email' => $user->email,
+            ':profilePicture' => $user->profilePicture,
             ':phoneNumber' => $user->phoneNumber,
             ':passwordHash' => $user->passwordHash,
-            ':isActive' => (int)$user->isActive,
+            ':isActive' => ($user->isActive === 'true' || $user->isActive === true || $user->isActive === 1) ? 1 : 0,
             ':userId' => $user->userId
         ]);
 

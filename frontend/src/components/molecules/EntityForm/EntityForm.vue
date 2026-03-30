@@ -1,6 +1,19 @@
 <template>
   <form @submit.prevent="$emit('submit', formData)" class="space-y-4">
-    
+    <!-- for users, i want to show the current profile picture if it exists -->
+    <div v-if="formData.profilePicture" class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+      <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
+        Profile Picture Preview
+      </label>
+      <div class="w-24 h-24 relative">
+        <img 
+          :src="getProfilePreview(formData.profilePicture)" 
+          class="h-full w-full object-cover rounded-full border-2 border-gray-200"
+        />
+      </div>
+    </div>
+
+    <!-- for cars, i show all current images with options to set main or delete -->
     <div v-if="formData.images && formData.images.length > 0" class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
       <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">
         Current Vehicle Photos
@@ -78,7 +91,8 @@ const formData = ref({});
 
 const updateFormData = (data) => {
   if (!data) return;
-  formData.value = JSON.parse(JSON.stringify(data));
+  //formData.value = JSON.parse(JSON.stringify(data));
+  formData.value = { ...data };
   if (!formData.value.images) formData.value.images = [];
 };
 
@@ -115,6 +129,19 @@ const setAsMain = async (url) => {
   }
 };
 
+
+const getProfilePreview = (value) => {
+  if (!value) return '';
+  
+  if (typeof value === 'string') {
+    return 'http://localhost/' + value;
+  }
+  if (value instanceof File) {
+    return URL.createObjectURL(value);
+  }
+  
+  return '';
+};
 
 updateFormData(props.initialData);
 

@@ -67,8 +67,14 @@ const handleFileChange = (event) => {
 
   fileCount.value = files.length;
 
-  const fileArray = Array.from(files);
-  emit('update:modelValue', fileArray);
+  if (props.multiple) {
+    // for cars emit the whole array
+    const fileArray = Array.from(files);
+    emit('update:modelValue', fileArray);
+  } else {
+    // for users emit just the first File object
+    emit('update:modelValue', files[0]);
+  }
 };
 
 const handleInput = (event) => {

@@ -30,7 +30,7 @@
     </select>
 
     <input
-      v-else-if="type !== 'file'"
+      v-else-if="type !== 'file' && !options" 
       :id="id"
       :type="type"
       :placeholder="placeholder"

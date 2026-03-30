@@ -17,5 +17,6 @@ interface ICarRepository
     public function update(Car $car): bool;
     public function delete(int $id): bool;
     public function addCarImage(CarImage $image): bool;
-    public function setMainImage(int $carId, int $imageId): bool; 
+    public function setMainImage(int $carId, string $url): bool;
+    public function deleteImageByUrl(string $url): bool;
 }

@@ -16,7 +16,7 @@
 
       <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 flex items-start justify-center z-50 overflow-y-auto p-4 sm:p-6">
         <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md my-auto h-auto max-h-[90vh] flex flex-col">
-          
+  
           <h2 class="text-xl font-bold mb-4 flex-shrink-0">
             {{ editingCar ? 'Edit Car' : 'Create New Car' }}
           </h2>
@@ -97,9 +97,17 @@ const openCreateModal = () => {
   isModalOpen.value = true;
 };
 
-const openEditModal = (car) => {
-  editingCar.value = { ...car }; // clone the car 
-  isModalOpen.value = true;
+const openEditModal = async (car) => {
+  isLoading.value = true;
+  try {
+    const response = await axios.get(`/api/cars/${car.carId}`);
+    editingCar.value = response.data; 
+    isModalOpen.value = true;
+  } catch (error) {
+    console.error("Failed to fetch car details:", error);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const closeModal = () => {
@@ -120,19 +128,14 @@ const fetchCars = async () => {
 };
 const handleFormSubmit = async (formData) => {
   const data = new FormData();
-  
-  // 1. Identify if we are updating or creating
   const isEdit = !!editingCar.value;
   const carId = isEdit ? editingCar.value.carId : null;
 
-  // 2. Map all fields to FormData
-  // We loop the schema to ensure we get everything defined
   carSchema.value.forEach(field => {
-    if (field.key === 'images') return; // Handled separately below
+    if (field.key === 'images') return; 
     
     let value = formData[field.key];
     
-    // Handle specific type conversions for PHP
     if (field.type === 'checkbox') {
       value = value ? '1' : '0';
     }
@@ -142,14 +145,11 @@ const handleFormSubmit = async (formData) => {
     }
   });
 
-  // 3. Handle Method Spoofing for Update
   if (isEdit) {
     data.append('_method', 'PUT');
   }
 
-  // 4. Handle Images (Multiple)
   if (formData.images && formData.images.length > 0) {
-    // If EntityForm gives you a FileList or Array
     for (let i = 0; i < formData.images.length; i++) {
       data.append('images[]', formData.images[i]);
     }
@@ -157,9 +157,6 @@ const handleFormSubmit = async (formData) => {
 
   try {
     isLoading.value = true;
-    
-    // 5. Determine URL and Method
-    // We always use POST because of Multipart/FormData + _method spoofing
     const url = isEdit ? `/api/cars/${carId}` : '/api/cars';
     
     await axios.post(url, data, {
@@ -168,9 +165,8 @@ const handleFormSubmit = async (formData) => {
       }
     });
 
-    // 6. Success Feedback & Cleanup
     closeModal();
-    await fetchCars(); // Refresh the list
+    await fetchCars(); 
     alert(isEdit ? "Car updated!" : "Car created!");
     
   } catch (error) {

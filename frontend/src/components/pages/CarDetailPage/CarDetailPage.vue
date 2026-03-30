@@ -7,25 +7,18 @@
 
     <template #visuals>
       <div v-if="loading" class="h-96 bg-gray-200 animate-pulse rounded-3xl"></div>
-      <CarGallery v-else-if="car" :images="car.images || []" />
+      <CarGallery v-else-if="car" :key="car.carId" :images="car.images" />
     </template>
 
     <template #sidebar>
       <div v-if="loading" class="h-[500px] bg-gray-200 animate-pulse rounded-3xl"></div>
       <CarDetails 
         v-else-if="car" 
+        :key="'details-' + car.carId"
         v-bind="car" 
         @rent="handleRentClick" 
       />
     </template>
-
-    <!-- <template #details v-if="car">
-       <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100">
-         <TextAtom size="sm" color="primary" weight="semibold">
-           Pro Tip: Rent for more than 7 days to get a 10% discount!
-         </TextAtom>
-       </div>
-    </template> -->
 
   </CarDetailTemplate>
 </template>
@@ -51,19 +44,34 @@ onMounted(async () => {
     const res = await get(`/api/cars/${route.params.id}`);
     const result = await res.json();
 
+    // 1. Safety check: make sure result exists
     if (result && result.carId) {
-        if (!result.images || result.images.length === 0) {
+        
+        // 2. Safely handle images array
+        let rawImages = result.images;
+        
+        // If it's a string (sometimes APIs return JSON strings), parse it
+        if (typeof rawImages === 'string') {
+            try { rawImages = JSON.parse(rawImages); } catch(e) { rawImages = []; }
+        }
+
+        if (Array.isArray(rawImages) && rawImages.length > 0) {
+            result.images = rawImages.map(img => {
+                if (!img) return 'https://placehold.co/800x600?text=Error';
+                if (img.startsWith('http')) return img;
+                return `http://localhost/${img}`;
+            });
+        } else {
             result.images = ['https://placehold.co/800x600?text=No+Images+Available'];
         }
+        
         car.value = result; 
-    } else {
-        console.error("Data received but carId is missing:", result);
     }
-    } catch (err) {
-        console.error("Connection lost or JSON parse error:", err);
-    } finally {
-        loading.value = false;
-    }
+  } catch (err) {
+    console.error("Critical Render Error:", err);
+  } finally {
+    loading.value = false;
+  }
 });
 
 const handleRentClick = () => {

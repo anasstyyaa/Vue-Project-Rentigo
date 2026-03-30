@@ -40,8 +40,11 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // cars 
     $r->addRoute('GET', '/api/cars', ['App\Controllers\CarController', 'getAll']);
     $r->addRoute('POST', '/api/cars', ['App\Controllers\CarController', 'create']);
+    $r->addRoute(['PUT', 'POST'], '/api/cars/{id:\d+}', ['App\Controllers\CarController', 'update']);
     $r->addRoute('GET', '/api/cars/{id:\d+}', ['App\Controllers\CarController', 'get']);
     $r->addRoute('DELETE', '/api/cars/{id:\d+}', ['App\Controllers\CarController', 'delete']);
+    $r->addRoute('POST', '/api/cars/delete-image', ['App\Controllers\CarController', 'deleteImage']);
+    $r->addRoute('POST', '/api/cars/set-main-image', ['App\Controllers\CarController', 'setMain']);
 
     // users
     $r->addRoute('POST', '/api/login', ['App\Controllers\UserController', 'login']);
@@ -50,7 +53,6 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // admin 
     $r->addRoute('GET', '/api/users', ['App\Controllers\UserController', 'index']); 
     $r->addRoute('DELETE', '/api/users/{id:\d+}', ['App\Controllers\UserController', 'delete']);
-    $r->addRoute(['PUT', 'POST'], '/api/cars/{id:\d+}', ['App\Controllers\CarController', 'update']);
     $r->addRoute('POST', '/api/users', ['App\Controllers\UserController', 'create']);
     
 });

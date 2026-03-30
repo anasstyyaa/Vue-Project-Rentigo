@@ -30,7 +30,7 @@ class CarRepository extends Repository implements ICarRepository
         return $stmt->fetchAll(PDO::FETCH_CLASS, Car::class);
     }
 
-    public function getById(int $id): ?Car{
+    public function getById(int $id): ?Car {
         $sql = "SELECT 
                 CarId AS carId, 
                 Brand AS brand, 
@@ -50,15 +50,22 @@ class CarRepository extends Repository implements ICarRepository
 
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute(['id' => $id]);
+        
         $car = $stmt->fetchObject(Car::class);
         
         if (!$car) return null; 
 
-        $imgSql = "SELECT ImageUrl FROM CarImages WHERE CarId = :id ORDER BY IsMainImage DESC LIMIT 4";
+        $imgSql = "SELECT ImageUrl FROM CarImages WHERE CarId = :id";
         $imgStmt = $this->getConnection()->prepare($imgSql);
         $imgStmt->execute(['id' => $id]);
+        
+    
+        $car->images = $imgStmt->fetchAll(PDO::FETCH_COLUMN) ?: [];
 
-        $car->images = $imgStmt->fetchAll(PDO::FETCH_COLUMN);
+        $mainImgSql = "SELECT ImageUrl FROM CarImages WHERE CarId = :id AND IsMainImage = 1 LIMIT 1";
+        $mainStmt = $this->getConnection()->prepare($mainImgSql);
+        $mainStmt->execute(['id' => $id]);
+        $car->mainImage = $mainStmt->fetchColumn() ?: null;
 
         return $car;
     }
@@ -132,17 +139,21 @@ class CarRepository extends Repository implements ICarRepository
         ]);
     }
 
-    public function setMainImage(int $carId, int $imageId): bool {
-        //set all images for this car to NOT main
+    public function setMainImage(int $carId, string $url): bool {
         $sql1 = "UPDATE CarImages SET IsMainImage = 0 WHERE CarId = :carId";
         $this->getConnection()->prepare($sql1)->execute([':carId' => $carId]);
 
-        //set the specific image to main
-        $sql2 = "UPDATE CarImages SET IsMainImage = 1 WHERE CarId = :carId AND ImageId = :imageId";
+        $sql2 = "UPDATE CarImages SET IsMainImage = 1 WHERE CarId = :carId AND ImageUrl = :url";
         return $this->getConnection()->prepare($sql2)->execute([
             ':carId' => $carId, 
-            ':imageId' => $imageId
+            ':url'   => $url
         ]);
     }
 
+    public function deleteImageByUrl(string $url): bool 
+    {
+        $sql = "DELETE FROM CarImages WHERE ImageUrl = :url";
+        $stmt = $this->getConnection()->prepare($sql);
+        return $stmt->execute([':url' => $url]);
+    }
 }

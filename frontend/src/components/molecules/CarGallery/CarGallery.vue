@@ -23,10 +23,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import ImageAtom from '../../atoms/AppImage/AppImage.vue';
 
-defineProps({
+const props = defineProps({
   images: {
     type: Array,
     required: true,
@@ -34,5 +34,12 @@ defineProps({
   }
 });
 
-const activeImage = ref('');
+const activeImage = ref(props.images[0] || '');
+
+watch(() => props.images, (newImages) => {
+  if (newImages && newImages.length > 0) {
+    activeImage.value = newImages[0];
+  }
+}, { immediate: true });
+
 </script>

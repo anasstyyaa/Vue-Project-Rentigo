@@ -44,7 +44,7 @@ class CarService implements ICarService
         return $this->repository->delete($id);
     }
 
-    public function handleImageUploads(int $carId, array $files): void
+    public function handleImageUploads(int $carId, array $files, bool $isUpdate = false): void
     {
         $uploadDir = '/app/public/uploads/cars/';
         $fileCount = is_array($files['name']) ? count($files['name']) : 0;
@@ -59,12 +59,11 @@ class CarService implements ICarService
             $fileName = time() . '_' . basename($files['name'][$i]);
             $targetFile = $uploadDir . $fileName;
 
-            // 3. Perform the move
             if (move_uploaded_file($files['tmp_name'][$i], $targetFile)) {
                 $carImage = new CarImage();
                 $carImage->carId = $carId;
                 $carImage->imageUrl = 'uploads/cars/' . $fileName;
-                $carImage->isMainImage = ($i === 0 ? 1 : 0);
+                $carImage->isMainImage = ($i === 0) ? 1 : 0;
 
                 $this->repository->addCarImage($carImage);
             } else {
@@ -76,5 +75,13 @@ class CarService implements ICarService
     public function addCarImage(CarImage $image): bool 
     {
         return $this->repository->addCarImage($image);
+    }
+
+    public function setMainImage(int $carId, string $url): bool {
+        return $this->repository->setMainImage($carId, $url);
+    }
+
+    public function deleteImageByUrl(string $url): bool {
+        return $this->repository->deleteImageByUrl($url);
     }
 }

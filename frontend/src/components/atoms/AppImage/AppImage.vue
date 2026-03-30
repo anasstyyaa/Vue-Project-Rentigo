@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 //import { ImageOff } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -33,6 +33,10 @@ const props = defineProps({
 });
 
 const hasError = ref(false);
+
+watch(() => props.src, () => {
+  hasError.value = false;
+});
 
 const handleError = () => {
   hasError.value = true;

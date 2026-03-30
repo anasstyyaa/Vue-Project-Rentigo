@@ -15,4 +15,6 @@ interface ICarService
     public function delete(int $id): bool;
     public function handleImageUploads(int $carId, array $files): void;
     public function addCarImage(CarImage $image): bool;
+    public function setMainImage(int $carId, string $url): bool;
+    public function deleteImageByUrl(string $url): bool; 
 }

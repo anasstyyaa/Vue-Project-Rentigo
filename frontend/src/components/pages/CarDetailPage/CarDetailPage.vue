@@ -43,14 +43,9 @@ onMounted(async () => {
   try {
     const res = await get(`/api/cars/${route.params.id}`);
     const result = await res.json();
-
-    // 1. Safety check: make sure result exists
     if (result && result.carId) {
-        
-        // 2. Safely handle images array
         let rawImages = result.images;
-        
-        // If it's a string (sometimes APIs return JSON strings), parse it
+      
         if (typeof rawImages === 'string') {
             try { rawImages = JSON.parse(rawImages); } catch(e) { rawImages = []; }
         }
@@ -75,6 +70,6 @@ onMounted(async () => {
 });
 
 const handleRentClick = () => {
-  router.push({ name: 'BookingForm', query: { carId: car.value.carId } });
+  router.push({ path: '/booking', query: { carId: car.value.carId } });
 };
 </script>

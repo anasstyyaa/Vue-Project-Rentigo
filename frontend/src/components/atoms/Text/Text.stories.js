@@ -64,3 +64,11 @@ export const Colors = {
     `,
   }),
 };
+
+export const Error = {
+  args: {
+    color: 'error',
+    size: 'sm',
+    label: 'This car is already booked for these dates.',
+  },
+};

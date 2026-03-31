@@ -28,14 +28,14 @@ class RentalService implements IRentalService
 
     public function create(Rental $rental): ?Rental
     {
-        $start = new \DateTime($rental->getStartDate('startDate'));
-        $end = new \DateTime($rental->getEndDate('endDate'));
+        $start = new \DateTime($rental->startDate);
+        $end = new \DateTime($rental->endDate);
         
         if ($end <= $start) {
             throw new \Exception("End date must be after the start date.");
         }
 
-        $car = $this->carRepository->getById($rental->getCarId('carId'));
+        $car = $this->carRepository->getById($rental->carId);
         if (!$car) {
             throw new \Exception("The selected car does not exist.");
         }
@@ -43,15 +43,14 @@ class RentalService implements IRentalService
         $interval = $start->diff($end);
         $days = $interval->days === 0 ? 1 : $interval->days; 
         
-        $rental->setDailyPrice((float)$car->pricePerDay); 
-        $rental->setTotalPrice($rental->getDailyPrice() * $days);
-        $rental->setStatus('Booked');
+        $rental->dailyPrice = (float)$car->pricePerDay;
+        $rental->totalPrice = $rental->dailyPrice * $days;
+        $rental->status = 'Booked';
 
-        if ($this->rentalRepository->isCarBooked($rental->getCarId('carId'), $rental->getStartDate('startDate'), $rental->getEndDate('endDate'))) {
+        if ($this->rentalRepository->isCarBooked($rental->carId, $rental->startDate, $rental->endDate)) {
             throw new \Exception("This car is already booked for these dates.");
         }
 
-        $rental->setStatus('Booked');
         return $this->rentalRepository->create($rental);
     }
 
@@ -65,5 +64,10 @@ class RentalService implements IRentalService
         // You would fetch the rental first and check the StartDate here.
         
         return $this->rentalRepository->cancel($id, $reason);
+    }
+
+    public function isCarBooked(int $carId, string $startDate, string $endDate): bool
+    {
+        return $this->rentalRepository->isCarBooked($carId, $startDate, $endDate);
     }
 }

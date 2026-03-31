@@ -38,7 +38,7 @@ class RentalRepository extends Repository implements IRentalRepository
 
     public function create(Rental $rental): ?Rental
     {
-        $sql = "INSERT INTO rentals (
+        $sql = "INSERT INTO Rentals (
                     UserId, CarId, StartDate, EndDate, 
                     PricePerDayAtBooking, TotalPrice, Status
                 ) VALUES (
@@ -48,17 +48,17 @@ class RentalRepository extends Repository implements IRentalRepository
 
         $stmt = $this->getConnection()->prepare($sql);
         $success = $stmt->execute([
-            'userId' => $rental->setUserId('userId'),
-            'carId'  => $rental->setCarId('carId'),
-            'start'  => $rental->setStartDate('startDate'),
-            'end'    => $rental->setEndDate('endDate'),
-            'daily'  => $rental->setDailyPrice('dailyPrice'),
-            'total'  => $rental->setTotalPrice('totalPrice'),
-            'status' => $rental->setStatus('status') ?? 'Booked'
+            'userId' => $rental->userId,
+            'carId'  => $rental->carId,
+            'start'  => $rental->startDate,
+            'end'    => $rental->endDate,
+            'daily'  => $rental->dailyPrice,
+            'total'  => $rental->totalPrice,
+            'status' => $rental->status ?? 'Booked'
         ]);
 
         if ($success) {
-            $rental->setRentalId((int)$this->getConnection()->lastInsertId());
+            $rental->rentalId = (int)$this->getConnection()->lastInsertId();
             return $rental;
         }
 
@@ -102,20 +102,20 @@ class RentalRepository extends Repository implements IRentalRepository
         $rentals = [];
         foreach ($rows as $row) {
             $rental = new Rental();
-            $rental->setRentalId((int)$row['RentalId']);
-            $rental->setUserId((int)$row['UserId']);
-            $rental->setCarId((int)$row['CarId']);
-            $rental->setStartDate($row['StartDate']);
-            $rental->setEndDate($row['EndDate']);
-            $rental->setDailyPrice((float)$row['PricePerDayAtBooking']);
-            $rental->setTotalPrice((float)$row['TotalPrice']);
-            $rental->setStatus($row['Status']);
+            $rental->rentalId = (int)$row['RentalId'];
+            $rental->userId = (int)$row['UserId'];
+            $rental->carId = (int)$row['CarId'];
+            $rental->startDate = $row['StartDate'];
+            $rental->endDate = $row['EndDate'];
+            $rental->dailyPrice = (float)$row['PricePerDayAtBooking'];
+            $rental->totalPrice = (float)$row['TotalPrice'];
+            $rental->status = $row['Status'];
 
             if (isset($row['Brand'])) {
-                $rental->setCarName($row['Brand'] . ' ' . $row['Model']);
+                $rental->carName = ($row['Brand'] . ' ' . $row['Model']);
             }
             if (isset($row['MainImage'])) {
-                $rental->setCarImage($row['MainImage']);
+                $rental->carImage = $row['MainImage'];
             }
             
             $rentals[] = $rental;

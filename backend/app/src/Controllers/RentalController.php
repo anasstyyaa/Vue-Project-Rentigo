@@ -53,23 +53,25 @@ class RentalController extends Controller
     public function store()
     {
         try {
-            $data = $this->getPostData();
- 
-            $rental = new Rental();
-            $rental->setUserId($_SESSION['user_id'] ?? null);
-            $rental->setCarId((int)($data['carId'] ?? 0));
-            $rental->setStartDate($data['startDate'] ?? '');
-            $rental->setEndDate($data['endDate'] ?? '');
+            /** @var Rental $rental */
+            $rental = $this->mapPostDataToClass(Rental::class);
 
-            if (!$rental->getUserId()) {
-                return $this->sendErrorResponse("You must be logged in to book.", 401);
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+                return $this->sendErrorResponse("Unauthorized", 401);
             }
 
-            $result = $this->service->create($rental);
-            
+            $user = $this->authService->getUserFromToken($matches[1]);
+            if (!$user) {
+                return $this->sendErrorResponse("Session expired", 401);
+            }
+
+            $rental->userId = $user->userId;
+            $savedRental = $this->service->create($rental);
+
             return $this->sendSuccessResponse([
                 'message' => 'Booking successful!',
-                'booking' => $result
+                'bookingId' => $savedRental->rentalId
             ], 201);
 
         } catch (\Exception $e) {

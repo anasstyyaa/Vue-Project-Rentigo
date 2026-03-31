@@ -1,9 +1,6 @@
 <template>
+ <Header/>
   <BookingTemplate>
-    <template #header>
-      <Header />
-    </template>
-
     <template #back-button>
       <button @click="router.back()" class="flex items-center gap-2 text-gray-600 hover:text-black transition-colors font-medium">
         <span class="text-xl">←</span> Back to car details
@@ -30,6 +27,7 @@
       />
     </template>
   </BookingTemplate>
+  <Footer/>
 </template>
 
 <script setup>
@@ -38,8 +36,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { get } from '@/utils/api'; 
 
 import BookingTemplate from '../../templates/BookingTemplate/BookingTemplate.vue';
-import Header from '../../organisms/Header/Header.vue';
 import BookingForm from '../../organisms/BookingForm/BookingForm.vue';
+import Header from '../../organisms/Header/Header.vue'; 
+import Footer from '@/components/organisms/Footer/Footer.vue';
 
 const route = useRoute();
 const router = useRouter();

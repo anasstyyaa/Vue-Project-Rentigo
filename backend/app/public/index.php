@@ -54,8 +54,8 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     // rentals 
     $r->addRoute('GET', '/api/my-bookings', ['App\Controllers\RentalController', 'getMyBookings']);
     $r->addRoute('POST', '/api/bookings', ['App\Controllers\RentalController', 'store']);
-    $r->addRoute('POST', '/api/bookings/{id}/cancel', ['App\Controllers\RentalController', 'cancel']);
-    
+    $r->addRoute('POST', '/api/bookings/{id:\d+}/cancel', ['App\Controllers\RentalController', 'cancel']);
+
  
     // admin 
     $r->addRoute('GET', '/api/users', ['App\Controllers\UserController', 'index']); 

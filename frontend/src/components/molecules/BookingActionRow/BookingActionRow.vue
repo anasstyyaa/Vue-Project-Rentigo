@@ -30,7 +30,7 @@
           label="Cancel" 
           size="small" 
           class="mt-2" 
-          @click="$emit('cancel', id)" 
+          @click="$emit('cancel', rentalId)" 
         />
       </div>
     </TableCell>
@@ -46,7 +46,7 @@ import DateTime from '../../atoms/DateDisplay/DateDisplay.vue';
 import MyButton from '../../atoms/Button/Button.vue';
 
 defineProps({
-  id: [Number, String],
+  rentalId: [Number, String],
   carName: String,
   startDate: String, 
   endDate: String,   

@@ -21,4 +21,3 @@
     </footer>
   </div>
 </template>
-

@@ -21,6 +21,7 @@
     </template>
 
   </CarDetailTemplate>
+  <Footer/>
 </template>
 
 <script setup>
@@ -30,9 +31,10 @@ import { get } from '@/utils/api';
 
 import CarDetailTemplate from '../../templates/CarDetailTemplate/CarDetailTemplate.vue';
 import Header from '../../organisms/Header/Header.vue';
+import Footer from '@/components/organisms/Footer/Footer.vue';
 import CarGallery from '../../molecules/CarGallery/CarGallery.vue';
 import CarDetails from '../../organisms/CarDetails/CarDetails.vue';
-import TextAtom from '../../atoms/Text/Text.vue';
+
 
 const route = useRoute();
 const router = useRouter();

@@ -62,11 +62,12 @@ defineEmits(['cancel-booking']);
 const currentTab = ref('active');
 
 const filteredBookings = computed(() => {
-  if (!props.bookings || !Array.isArray(props.bookings)) {
-    return [];
-  }
+  if (!props.bookings) return [];
 
-  return props.bookings.filter(b => {
+  return props.bookings.map(booking => ({
+    ...booking,
+    canCancel: ['Confirmed', 'Pending', 'Booked'].includes(booking.status)
+  })).filter(b => {
     const isActiveStatus = ['Confirmed', 'Pending', 'Booked'].includes(b.status);
     return currentTab.value === 'active' ? isActiveStatus : !isActiveStatus;
   });

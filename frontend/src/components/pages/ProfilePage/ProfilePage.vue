@@ -15,7 +15,6 @@
             <Badge variant="primary">Verified Member</Badge>
           </template>
         </ProfileSummary>
-        <MyButton label="Sign Out" @click="handleLogout" />
       </div>
     </template>
 
@@ -189,12 +188,6 @@ const handleCancelSubmit = async (reason) => {
   } finally {
     cancelLoading.value = false;
   }
-};
-
-const handleLogout = () => {
-  localStorage.removeItem('auth_token'); 
-  localStorage.removeItem('user');      
-  router.push('/login');
 };
 
 const openEditModal = () => {

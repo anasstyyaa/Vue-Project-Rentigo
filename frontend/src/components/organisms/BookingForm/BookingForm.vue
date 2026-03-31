@@ -24,7 +24,13 @@
       <div class="pt-4">
         <MyButton 
           label="Confirm & Rent Now" 
-          class="w-full h-14 text-lg shadow-lg shadow-black/10"
+          class="w-full h-14 text-lg shadow-lg shadow-black/10 transition-all duration-300
+            enabled:hover:scale-[1.02] 
+            enabled:hover:brightness-110 
+            enabled:hover:shadow-2xl 
+            enabled:hover:shadow-blue-500/20
+            active:scale-95 
+            disabled:cursor-not-allowed disabled:opacity-60 disabled:bg-gray-200"
           :loading="loading"
           :disabled="calculatedDays < 1"
           @click="handleConfirm"

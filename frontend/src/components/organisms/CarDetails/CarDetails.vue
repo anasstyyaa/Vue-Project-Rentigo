@@ -49,7 +49,10 @@
       label="Rent Now" 
       :primary="true" 
       size="large" 
-      class="w-full h-14 !rounded-2xl shadow-lg shadow-blue-100 transition-transform active:scale-95"
+      class="w-full h-14 !rounded-2xl shadow-lg shadow-blue-100 
+         transition-all duration-300 ease-out
+         hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-200
+         active:scale-95"
       @click="$emit('rent')"
     />
 

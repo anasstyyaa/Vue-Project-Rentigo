@@ -1,5 +1,8 @@
 <template>
-  <tr class="hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0">
+  <tr 
+    class="group transition-all duration-300 border-b border-gray-50 last:border-0
+           hover:bg-blue-50/30 hover:shadow-md hover:translate-x-1"
+  >
     <TableCell primary>
       <div class="flex flex-col">
         <Text weight="bold" size="base">{{ carName }}</Text>
@@ -29,7 +32,7 @@
           v-if="canCancel" 
           label="Cancel" 
           size="small" 
-          class="mt-2" 
+          class="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:!bg-red-600" 
           @click="$emit('cancel', rentalId)" 
         />
       </div>

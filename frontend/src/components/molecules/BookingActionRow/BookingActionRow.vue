@@ -31,11 +31,17 @@
 
         <div class="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <MyButton 
-              label="View Details" 
-              size="small" 
-              class="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:!bg-blue-400" 
-              @click="$emit('view-details', rentalId)" 
-            />
+            label="View Details" 
+            size="small" 
+            class="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:!bg-blue-400" 
+            @click="$emit('view-details', rentalId)" 
+          />
+          <MyButton 
+            label="Leave Review" 
+            size="small" 
+            class="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:!bg-yellow-400" 
+            @click="$emit('leave-review', rentalId)" 
+          />
           <MyButton 
             v-if="canCancel" 
             label="Cancel" 
@@ -69,5 +75,5 @@ defineProps({
   canCancel: Boolean
 });
 
-defineEmits(['cancel', 'view-details']);
+defineEmits(['cancel', 'view-details', 'leave-review']);
 </script>

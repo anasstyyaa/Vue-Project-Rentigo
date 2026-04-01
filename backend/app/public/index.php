@@ -56,6 +56,9 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/api/bookings', ['App\Controllers\RentalController', 'store']);
     $r->addRoute('POST', '/api/bookings/{id:\d+}/cancel', ['App\Controllers\RentalController', 'cancel']);
 
+    // reviews
+    $r->addRoute('POST', '/api/reviews', ['App\Controllers\ReviewController', 'handlePost']);
+
  
     // admin 
     $r->addRoute('GET', '/api/users', ['App\Controllers\UserController', 'index']); 
@@ -121,6 +124,12 @@ switch ($routeInfo[0]) {
             $repository = new \App\Repositories\RentalRepository();
             $carRepository = new \App\Repositories\CarRepository();
             $service = new \App\Services\RentalService($repository, $carRepository);
+            $authService = new \App\Services\AuthService();
+            $controller = new $class($service, $authService);
+        
+        } elseif ($class === 'App\Controllers\ReviewController') {
+            $repository = new \App\Repositories\ReviewRepository();
+            $service = new \App\Services\ReviewService($repository);
             $authService = new \App\Services\AuthService();
             $controller = new $class($service, $authService);
         

@@ -10,33 +10,17 @@ use App\Services\Interfaces\IAuthService;
 class RentalController extends Controller
 {
     private IRentalService $service;
-    private IAuthService $authService;
 
     public function __construct(IRentalService $service, IAuthService $authService)
     {
+        parent::__construct($authService);
         $this->service = $service;
-        $this->authService = $authService;
     }
 
-    /**
-     * GET /api/my-bookings
-     * Fetches bookings for the currently authenticated user
-     */
     public function getMyBookings()
     {
         try {
-            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-            if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-                return $this->sendErrorResponse("Unauthorized: No token provided", 401);
-            }
-
-            $token = $matches[1];
-            $user = $this->authService->getUserFromToken($token);
-
-            if (!$user) {
-                return $this->sendErrorResponse("Unauthorized: Invalid token", 401);
-            }
-
+            $user = $this->getAuthenticatedUser();
             $bookings = $this->service->getRentalsByUserId($user->userId);
 
             return $this->sendSuccessResponse($bookings);
@@ -46,25 +30,12 @@ class RentalController extends Controller
         }
     }
 
-    /**
-     * POST /api/bookings
-     * Creates a new rental record
-     */
     public function store()
     {
         try {
             /** @var Rental $rental */
             $rental = $this->mapPostDataToClass(Rental::class);
-
-            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-            if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
-                return $this->sendErrorResponse("Unauthorized", 401);
-            }
-
-            $user = $this->authService->getUserFromToken($matches[1]);
-            if (!$user) {
-                return $this->sendErrorResponse("Session expired", 401);
-            }
+            $user = $this->getAuthenticatedUser();
 
             $rental->userId = $user->userId;
             $savedRental = $this->service->create($rental);
@@ -79,9 +50,6 @@ class RentalController extends Controller
         }
     }
 
-    /**
-     * POST /api/bookings/{id}/cancel
-     */
     public function cancel($id)
     {
         try {

@@ -27,6 +27,7 @@
         :bookings="bookings" 
         @cancel-booking="openCancelModal" 
         @view-details="handleViewDetails"
+        @leave-review="openReviewModal"
       />
     </template>
   </ProfileTemplate>
@@ -53,6 +54,14 @@
       />
       </div>
   </ModalAtom>
+  <ModalAtom :show="showReviewModal" @close="showReviewModal = false">
+    <ReviewForm 
+      v-if="activeBooking"
+      :carName="activeBooking.carName"
+      :loading="reviewLoading"
+      @submit="handleReviewSubmit"
+    />
+  </ModalAtom>
 </template>
 
 <script setup>
@@ -72,6 +81,7 @@ import MyButton from '../../atoms/Button/Button.vue';
 import ModalAtom from '../../atoms/Modal/Modal.vue';
 import CancelBookingForm from '../../organisms/CancelBookingForm/CancelBookingForm.vue'; 
 import BookingSuccessSummary from '../../organisms/BookingSuccessSummary/BookingSuccessSummary.vue';
+import ReviewForm from '../../organisms/ReviewForm/ReviewForm.vue';
 
 
 const route = useRoute();
@@ -203,6 +213,47 @@ const handleViewDetails = (bookingId) => {
       totalDays: booking.totalDays || 1
     };
     showDetailsModal.value = true;
+  }
+};
+
+const showReviewModal = ref(false);
+const reviewLoading = ref(false);
+
+const openReviewModal = (bookingId) => {
+  activeBooking.value = bookings.value.find(b => b.rentalId === bookingId);
+  if (activeBooking.value) {
+    showReviewModal.value = true;
+  }
+};
+
+const handleReviewSubmit = async (reviewData) => {
+  reviewLoading.value = true;
+  try {
+    const response = await fetch('http://localhost/api/reviews', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        rentalId: activeBooking.value.rentalId,
+        carId: activeBooking.value.carId, // Ensure your booking object has carId
+        userId: user.value.id,
+        rating: reviewData.rating,
+        comment: reviewData.comment
+      })
+    });
+
+    if (response.ok) {
+      showReviewModal.value = false;
+      alert("Thank you for your review!");
+      // Optionally refresh bookings to hide the "Leave Review" button
+      await fetchProfileData();
+    }
+  } catch (error) {
+    console.error("Review Error:", error);
+  } finally {
+    reviewLoading.value = false;
   }
 };
 

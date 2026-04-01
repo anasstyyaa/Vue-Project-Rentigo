@@ -2,10 +2,35 @@
 
 namespace App\Framework;
 
+use App\Services\Interfaces\IAuthService;
+
 class Controller
 {
-    public function __construct()
+    private IAuthService $authService;
+
+    public function __construct(IAuthService $authService)
     {
+        $this->authService = $authService;
+    }
+
+    protected function getAuthenticatedUser()
+    {
+        $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+
+        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+            $this->sendErrorResponse("Unauthorized: No token provided", 401);
+            exit; 
+        }
+
+        $token = $matches[1];
+        $user = $this->authService->getUserFromToken($token);
+
+        if (!$user) {
+            $this->sendErrorResponse("Unauthorized: Invalid or expired token", 401);
+            exit;
+        }
+
+        return $user;
     }
 
     protected function sendSuccessResponse($data = [], $code = 200)

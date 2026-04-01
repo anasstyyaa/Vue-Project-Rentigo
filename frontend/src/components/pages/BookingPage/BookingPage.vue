@@ -27,6 +27,14 @@
       />
     </template>
   </BookingTemplate>
+
+  <Modal :show="showModal" @close="showModal = false">
+    <BookingSuccessSummary 
+      v-if="isBooked" 
+      v-bind="finalBookingData" 
+      @view-bookings="router.push('/profile')"
+    />
+  </Modal>
   <Footer/>
 </template>
 
@@ -39,6 +47,9 @@ import BookingTemplate from '../../templates/BookingTemplate/BookingTemplate.vue
 import BookingForm from '../../organisms/BookingForm/BookingForm.vue';
 import Header from '../../organisms/Header/Header.vue'; 
 import Footer from '@/components/organisms/Footer/Footer.vue';
+import Modal from '../../atoms/Modal/Modal.vue';
+import BookingSuccessSummary from '../../organisms/BookingSuccessSummary/BookingSuccessSummary.vue';
+
 
 const route = useRoute();
 const router = useRouter();
@@ -47,6 +58,10 @@ const car = ref(null);
 const loading = ref(true);
 const submitting = ref(false);
 const apiError = ref('');
+
+const showModal = ref(false);
+const isBooked = ref(false);
+const finalBookingData = ref(null);
 
 const formattedImage = computed(() => {
   if (!car.value || !car.value.images) return 'https://placehold.co/800x600?text=No+Image';
@@ -86,9 +101,25 @@ const handleBookingSubmit = async (bookingDetails) => {
     });
 
     const result = await response.json();
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     if (response.ok) {
-      router.push('/profile');
+      finalBookingData.value = {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      carImage: formattedImage.value,
+      carBrand: car.value.brand,
+      carModel: car.value.model,
+      carYear: car.value.year,
+      carTransmission: car.value.transmission,
+      totalPrice: bookingDetails.totalPrice,
+      startDate: bookingDetails.startDate,
+      endDate: bookingDetails.endDate,
+      totalDays: bookingDetails.totalDays 
+    };
+      
+      isBooked.value = true; 
+      showModal.value = true;
     } else {
       apiError.value = result.error || "Booking failed.";
     }

@@ -32,6 +32,7 @@
             :key="booking.id"
             v-bind="booking"
             @cancel="$emit('cancel-booking', $event)"
+            @view-details="id => $emit('view-details', id)"
           />
           <tr v-if="filteredBookings.length === 0">
             <td colspan="4" class="px-6 py-12 text-center">
@@ -58,7 +59,7 @@ const props = defineProps({
   }
 });
 
-defineEmits(['cancel-booking']);
+defineEmits(['cancel-booking', 'view-details']);
 const currentTab = ref('active');
 
 const filteredBookings = computed(() => {

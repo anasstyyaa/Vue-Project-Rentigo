@@ -28,13 +28,22 @@
       <div class="flex flex-col items-end">
         <Text size="xs" color="muted" weight="bold" class="uppercase tracking-tighter">Total Amount</Text>
         <Price :amount="totalPrice" :showPeriod="false" />
-        <MyButton 
-          v-if="canCancel" 
-          label="Cancel" 
-          size="small" 
-          class="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:!bg-red-600" 
-          @click="$emit('cancel', rentalId)" 
-        />
+
+        <div class="flex gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <MyButton 
+              label="View Details" 
+              size="small" 
+              class="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:!bg-blue-400" 
+              @click="$emit('view-details', rentalId)" 
+            />
+          <MyButton 
+            v-if="canCancel" 
+            label="Cancel" 
+            size="small" 
+            class="mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:!bg-red-400" 
+            @click="$emit('cancel', rentalId)" 
+          />
+        </div>
       </div>
     </TableCell>
   </tr>
@@ -60,5 +69,5 @@ defineProps({
   canCancel: Boolean
 });
 
-defineEmits(['cancel']);
+defineEmits(['cancel', 'view-details']);
 </script>

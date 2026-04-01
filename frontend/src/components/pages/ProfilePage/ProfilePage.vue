@@ -26,6 +26,7 @@
       <BookingsTable 
         :bookings="bookings" 
         @cancel-booking="openCancelModal" 
+        @view-details="handleViewDetails"
       />
     </template>
   </ProfileTemplate>
@@ -42,6 +43,15 @@
       @close="showCancelModal = false"
       @submit="handleCancelSubmit"
     />
+  </ModalAtom>
+  <ModalAtom :show="showDetailsModal" @close="showDetailsModal = false">
+    <div class="p-2">
+      <BookingSuccessSummary 
+        v-if="selectedBooking" 
+        v-bind="selectedBooking" 
+        @view-bookings="showDetailsModal = false"
+      />
+      </div>
   </ModalAtom>
 </template>
 
@@ -61,6 +71,8 @@ import Badge from '../../atoms/Badge/Badge.vue';
 import MyButton from '../../atoms/Button/Button.vue';
 import ModalAtom from '../../atoms/Modal/Modal.vue';
 import CancelBookingForm from '../../organisms/CancelBookingForm/CancelBookingForm.vue'; 
+import BookingSuccessSummary from '../../organisms/BookingSuccessSummary/BookingSuccessSummary.vue';
+
 
 const route = useRoute();
 const router = useRouter();
@@ -132,33 +144,6 @@ const openCancelModal = (bookingId) => {
   }
 };
 
-// const handleCancel = async (bookingId) => {
-//   if (!confirm("Are you sure you want to cancel this booking?")) return;
-
-//   const token = localStorage.getItem('auth_token');
-  
-//   try {
-//     const response = await fetch(`http://localhost/api/bookings/${bookingId}/cancel`, {
-//       method: 'POST',
-//       headers: { 
-//         'Authorization': `Bearer ${token}`,
-//         'Content-Type': 'application/json' 
-//       },
-//       body: JSON.stringify({ reason: 'Cancelled by user' })
-//     });
-    
-//     if (response.ok) {
-//       await fetchProfileData(true); 
-//     } else {
-//       const errorData = await response.json();
-//       alert(errorData.error || "Could not cancel booking.");
-//     }
-//   } catch (error) {
-//     console.error("Cancel error:", error);
-//     alert("Server connection error. Please try again.");
-//   }
-// };
-
 const handleCancelSubmit = async (reason) => {
   if (!activeBooking.value) return;
   
@@ -187,6 +172,37 @@ const handleCancelSubmit = async (reason) => {
     console.error("Cancel error:", error);
   } finally {
     cancelLoading.value = false;
+  }
+};
+
+const showDetailsModal = ref(false);
+const selectedBooking = ref(null);
+
+const handleViewDetails = (bookingId) => {
+  const booking = bookings.value.find(b => b.rentalId === bookingId);
+  
+  if (booking) {
+    const imageName = booking.carImage || booking.mainImage;
+    const formattedImage = imageName 
+      ? `http://localhost/${imageName}`
+      : 'https://placehold.co/600x400?text=No+Image';
+
+    selectedBooking.value = {
+      firstName: user.value.firstName,
+      lastName: user.value.lastName,
+      email: user.value.email, 
+      phone: user.value.phone, 
+      carImage: formattedImage, 
+      carBrand: booking.carName.split(' ')[0],
+      carModel: booking.carName.split(' ')[1],
+      carYear: booking.carYear || '2024',
+      carTransmission: booking.carTransmission || 'Auto',
+      totalPrice: booking.totalPrice,
+      startDate: booking.startDate,
+      endDate: booking.endDate,
+      totalDays: booking.totalDays || 1
+    };
+    showDetailsModal.value = true;
   }
 };
 

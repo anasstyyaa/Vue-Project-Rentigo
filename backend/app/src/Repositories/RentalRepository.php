@@ -25,7 +25,7 @@ class RentalRepository extends Repository implements IRentalRepository
     }
 
     public function getAllBookings(): array {
-        $sql = "SELECT r.*, u.FirstName as FirstName, u.LastName as LastName, c.Make, c.Model 
+        $sql = "SELECT r.*, u.FirstName as FirstName, u.LastName as LastName, c.Model, c.Model 
                 FROM Rentals r
                 JOIN Users u ON r.UserId = u.UserId
                 JOIN Cars c ON r.CarId = c.CarId

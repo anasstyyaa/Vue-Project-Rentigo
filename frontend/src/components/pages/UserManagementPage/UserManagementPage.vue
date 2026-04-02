@@ -1,5 +1,5 @@
 <template>
-  <AdminHeader>
+  <AdminHeader title="User Management">
     <div class="mb-6 flex justify-between items-center">
       <p class="text-gray-600">Overview of all registered users and their status.</p>
       <button @click="openCreateModal" class="bg-blue-600 text-white px-4 py-2 rounded-lg">

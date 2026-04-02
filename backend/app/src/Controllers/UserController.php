@@ -63,6 +63,39 @@ class UserController extends Controller
         }
     }
 
+    // this is for the user to update their own profile, not for admin to update any user
+    public function updateProfile()
+    {
+        try {
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+            if (!preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+                return $this->sendErrorResponse("Unauthorized", 401);
+            }
+
+            $user = $this->authService->getUserFromToken($matches[1]);
+            if (!$user) {
+                return $this->sendErrorResponse("Invalid session", 401);
+            }
+
+            $user->firstName = $_POST['firstName'] ?? $user->firstName;
+            $user->lastName  = $_POST['lastName'] ?? $user->lastName;
+            $user->email     = $_POST['email'] ?? $user->email;
+            $user->phoneNumber = $_POST['phoneNumber'] ?? $user->phoneNumber;
+
+            $updatedUser = $this->userService->update($user);
+
+            if ($updatedUser) {
+                $userDTO = new \App\Models\UserDTO($updatedUser);
+                return $this->sendSuccessResponse($userDTO->toArray());
+            }
+
+            return $this->sendErrorResponse("Update failed", 500);
+
+        } catch (\Exception $e) {
+            return $this->sendErrorResponse($e->getMessage(), 500);
+        }
+    }
+
     public function create(){
         try {
             $user = $this->mapPostDataToClass(User::class);
@@ -106,44 +139,40 @@ class UserController extends Controller
     }
 
     public function register()
-{
-    try {
-        $data = $this->getPostData();
-        // Manually Map to ensure no hidden nulls from the mapPostDataToClass function
-        $user = new User();
-        $user->firstName = $data['firstName'] ?? '';
-        $user->lastName = $data['lastName'] ?? '';
-        $user->email = $data['email'] ?? '';
-        $user->username = $data['username'] ?? '';
-        $user->phoneNumber = $data['phoneNumber'] ?? '';
-        $user->passwordHash = $data['passwordHash'] ?? $data['password'] ?? '';
-        
-        // Ensure RoleId is an INTEGER 1, not a string "1" or null
-        $user->roleId = 1; 
-        $user->isActive = 1;
+    {
+        try {
+            $data = $this->getPostData();
+            $user = new User();
+            $user->firstName = $data['firstName'] ?? '';
+            $user->lastName = $data['lastName'] ?? '';
+            $user->email = $data['email'] ?? '';
+            $user->username = $data['username'] ?? '';
+            $user->phoneNumber = $data['phoneNumber'] ?? '';
+            $user->passwordHash = $data['passwordHash'] ?? $data['password'] ?? '';
+            
+            $user->roleId = 1; 
+            $user->isActive = 1;
 
-        // Basic validation before hitting the DB
-        if (empty($user->email) || empty($user->passwordHash) || empty($user->username)) {
-            return $this->sendErrorResponse("Email, Username, and Password are required", 400);
+            if (empty($user->email) || empty($user->passwordHash) || empty($user->username)) {
+                return $this->sendErrorResponse("Email, Username, and Password are required", 400);
+            }
+
+            $createdUser = $this->authService->register($user);
+
+            if ($createdUser) {
+                return $this->sendSuccessResponse($createdUser, 201);
+            }
+
+            return $this->sendErrorResponse('Registration failed', 409);
+
+        } catch (\App\Exceptions\UserAlreadyExistsException $e) {
+            return $this->sendErrorResponse("Email or Username already exists.", 409);
+        } catch (\PDOException $e) {
+            return $this->sendErrorResponse("Database Error: " . $e->getMessage(), 500);
+        } catch (\Exception $e) {
+            return $this->sendErrorResponse($e->getMessage(), 500);
         }
-
-        $createdUser = $this->authService->register($user);
-
-        if ($createdUser) {
-            return $this->sendSuccessResponse($createdUser, 201);
-        }
-
-        return $this->sendErrorResponse('Registration failed', 409);
-
-    } catch (\App\Exceptions\UserAlreadyExistsException $e) {
-        return $this->sendErrorResponse("Email or Username already exists.", 409);
-    } catch (\PDOException $e) {
-        // This will tell us EXACTLY which column is failing if it happens again
-        return $this->sendErrorResponse("Database Error: " . $e->getMessage(), 500);
-    } catch (\Exception $e) {
-        return $this->sendErrorResponse($e->getMessage(), 500);
     }
-}
 
     public function currentUser()
     {

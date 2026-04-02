@@ -50,6 +50,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('POST', '/api/login', ['App\Controllers\UserController', 'login']);
     $r->addRoute('POST', '/api/register', ['App\Controllers\UserController', 'register']);
     $r->addRoute('GET', '/api/profile', ['App\Controllers\UserController', 'getProfile']);
+    $r->addRoute('POST', '/api/profile/update', ['App\Controllers\UserController', 'updateProfile']);
 
     // rentals 
     $r->addRoute('GET', '/api/my-bookings', ['App\Controllers\RentalController', 'getMyBookings']);

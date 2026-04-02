@@ -75,7 +75,6 @@
           </div>
           
           <div v-else class="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-100">
-            <div class="text-gray-400 mb-4 text-4xl">🔍</div>
             <p class="text-gray-500 text-lg">No cars found matching your search.</p>
           </div>
         </div>

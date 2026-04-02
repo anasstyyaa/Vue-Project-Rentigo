@@ -61,6 +61,7 @@ const carSchema = computed(() => {
     { key: 'brand', label: 'Brand', placeholder: 'e.g. BMW' },
     { key: 'model', label: 'Model', placeholder: 'e.g. M4' },
     { key: 'year', label: 'Year', type: 'number' },
+    { key: 'color', label: 'Exterior Color', placeholder: 'e.g. Alpine White' },
     { 
       key: 'transmission', 
       label: 'Transmission', 
@@ -81,6 +82,12 @@ const carSchema = computed(() => {
     },
     { key: 'pricePerDay', label: 'Price per Day ($)', type: 'number' },
     { key: 'seats', label: 'Seats', type: 'number' },
+    { 
+      key: 'description', 
+      label: 'Description', 
+      type: 'textarea', 
+      placeholder: 'Describe the vehicle features...' 
+    },
     { 
       key: 'images', 
       label: 'Vehicle Photos (Max 4)', 

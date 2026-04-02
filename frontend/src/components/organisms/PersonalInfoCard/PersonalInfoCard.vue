@@ -2,7 +2,12 @@
   <section class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="p-6 border-b border-gray-100 flex justify-between items-center">
       <Heading :level="3">Personal Information</Heading>
-      <MyButton label="Edit" size="small" @click="$emit('edit')" />
+      <MyButton 
+        label="Edit" 
+        size="small" 
+        @click="$emit('edit')" 
+        class="transition-all duration-200 hover:bg-blue-50 hover:text-blue-700 active:scale-95"
+      />
     </div>
     <div class="p-6 space-y-1">
       <InfoField label="Username" :value="`@${user.username}`" />

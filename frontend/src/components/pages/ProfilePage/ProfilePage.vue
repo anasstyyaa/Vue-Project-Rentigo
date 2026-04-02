@@ -62,6 +62,23 @@
       @submit="handleReviewSubmit"
     />
   </ModalAtom>
+  <ModalAtom :show="showEditModal" @close="showEditModal = false">
+    <div class="p-6 flex flex-col max-h-[90vh]"> 
+
+      <div class="overflow-y-auto pr-2 custom-scrollbar"> 
+        <EntityForm 
+          :schema="userSchema" 
+          :initialData="user" 
+          @submit="handleProfileSubmit" 
+          @cancel="showEditModal = false" 
+        />
+      </div>
+      
+      <div v-if="editLoading" class="absolute inset-0 bg-white/50 flex items-center justify-center z-50">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    </div>
+  </ModalAtom>
 </template>
 
 <script setup>
@@ -76,12 +93,15 @@ import ProfileSummary from '../../molecules/ProfileSummary/ProfileSummary.vue';
 import PersonalInfoCard from '../../organisms/PersonalInfoCard/PersonalInfoCard.vue';
 import BookingsTable from '../../organisms/BookingsTable/BookingsTable.vue';
 import Text from '../../atoms/Text/Text.vue';
+import Heading from '../../atoms/Heading/Heading.vue';
 import Badge from '../../atoms/Badge/Badge.vue';
 import MyButton from '../../atoms/Button/Button.vue';
 import ModalAtom from '../../atoms/Modal/Modal.vue';
 import CancelBookingForm from '../../organisms/CancelBookingForm/CancelBookingForm.vue'; 
 import BookingSuccessSummary from '../../organisms/BookingSuccessSummary/BookingSuccessSummary.vue';
 import ReviewForm from '../../organisms/ReviewForm/ReviewForm.vue';
+import EntityForm from '../../molecules/EntityForm/EntityForm.vue';
+
 
 
 const route = useRoute();
@@ -143,6 +163,7 @@ const fetchProfileData = async () => {
 };
 
 
+
 const showCancelModal = ref(false);
 const activeBooking = ref(null);
 const cancelLoading = ref(false);
@@ -185,6 +206,7 @@ const handleCancelSubmit = async (reason) => {
   }
 };
 
+
 const showDetailsModal = ref(false);
 const selectedBooking = ref(null);
 
@@ -215,6 +237,7 @@ const handleViewDetails = (bookingId) => {
     showDetailsModal.value = true;
   }
 };
+
 
 const showReviewModal = ref(false);
 const reviewLoading = ref(false);
@@ -256,9 +279,95 @@ const handleReviewSubmit = async (reviewData) => {
   }
 };
 
+
+
+const showEditModal = ref(false);
+const editLoading = ref(false);
+
+const userSchema = [
+  { key: 'firstName', label: 'First Name', placeholder: 'Enter first name' },
+  { key: 'lastName', label: 'Last Name', placeholder: 'Enter last name' },
+  { key: 'email', label: 'Email Address', type: 'email' },
+  { key: 'phoneNumber', label: 'Phone Number', placeholder: '+1 234 567 890' }, 
+  { 
+    key: 'profilePicture', 
+    label: 'Change Profile Picture', 
+    type: 'file', 
+    accept: 'image/*' 
+  }
+];
+
+const handleProfileSubmit = async (formData) => {
+  editLoading.value = true;
+  const token = localStorage.getItem('auth_token');
+  
+  const data = new FormData();
+  data.append('firstName', formData.firstName);
+  data.append('lastName', formData.lastName);
+  data.append('email', formData.email);
+  data.append('phoneNumber', formData.phoneNumber || '');
+  
+  if (formData.profilePicture instanceof File) {
+    data.append('profilePicture', formData.profilePicture);
+  }
+
+  try {
+    const response = await fetch('http://localhost/api/profile/update', {
+      method: 'POST', 
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: data
+    });
+
+    if (response.ok) {
+      const updatedUser = await response.json();
+      // Update local state and storage
+      user.value = updatedUser.data || updatedUser;
+      localStorage.setItem('user', JSON.stringify(user.value));
+      
+      showEditModal.value = false;
+      alert("Profile updated successfully!");
+    } else {
+      alert("Failed to update profile.");
+    }
+  } catch (error) {
+    console.error("Profile Update Error:", error);
+  } finally {
+    editLoading.value = false;
+  }
+};
+
 const openEditModal = () => {
   console.log("Edit modal opened");
+  showEditModal.value = true; 
 };
 
 onMounted(fetchProfileData);
 </script>
+
+<style scoped>
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1; 
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; 
+}
+
+.absolute.inset-0 {
+  backdrop-filter: blur(2px);
+  transition: all 0.3s ease;
+}
+</style>

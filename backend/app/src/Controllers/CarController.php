@@ -44,6 +44,9 @@ class CarController extends Controller
         try{
             $car = $this->mapPostDataToClass(Car::class);
             $createdCar = $this->carService->create($car);
+            if ($createdCar && !empty($_FILES['images'])) {
+                $this->carService->handleImageUploads($createdCar->carId, $_FILES['images']);
+            }
             return $this->sendSuccessResponse($createdCar, 201);
         } catch (\Exception $e) {
             return $this->sendErrorResponse('Internal server error', 500);

@@ -24,6 +24,19 @@ class RentalRepository extends Repository implements IRentalRepository
         return $this->mapRowsToModels($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
+    public function getAllBookings(): array {
+        $sql = "SELECT r.*, u.FirstName as FirstName, u.LastName as LastName, c.Make, c.Model 
+                FROM Rentals r
+                JOIN Users u ON r.UserId = u.UserId
+                JOIN Cars c ON r.CarId = c.CarId
+                ORDER BY r.CreatedAt DESC";
+                
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->execute();
+        
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
     public function getAll(): array
     {
         $sql = "SELECT r.*, c.Brand, c.Model, u.FirstName, u.LastName 

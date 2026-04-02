@@ -37,6 +37,7 @@ const handleRegister = async (data) => {
       lastName: data.lastName,
       email: data.email,
       passwordHash: data.password, 
+      username: data.username, 
       phoneNumber: data.phoneNumber
     });
 

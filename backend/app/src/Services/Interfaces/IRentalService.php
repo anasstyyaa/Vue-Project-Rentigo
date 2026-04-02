@@ -10,4 +10,5 @@ interface IRentalService
     public function create(Rental $rental): ?Rental;
     public function cancel(int $id, string $reason): bool;
     public function isCarBooked(int $carId, string $startDate, string $endDate): bool; 
+    public function getAllBookings(): array; 
 }

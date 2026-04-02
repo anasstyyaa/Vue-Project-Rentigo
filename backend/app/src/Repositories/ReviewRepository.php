@@ -37,4 +37,6 @@ class ReviewRepository extends Repository implements IReviewRepository {
         $stmt->execute([$rentalId]);
         return $stmt->fetchColumn() > 0;
     }
+
+    
 }

@@ -8,7 +8,7 @@
         Back to Website
       </router-link>
 
-      <router-link to="/admin/dashboard" class="nav-link" active-class="active">Dashboard</router-link>
+      <router-link to="/admin/bookings" class="nav-link" active-class="active">Dashboard</router-link>
       <router-link to="/admin/users" class="nav-link" active-class="active">Manage Users</router-link>
       <router-link to="/admin/cars" class="nav-link" active-class="active">Manage Cars</router-link>
     </template>

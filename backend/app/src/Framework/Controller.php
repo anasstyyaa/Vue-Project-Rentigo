@@ -17,7 +17,7 @@ class Controller
     {
         $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
 
-        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+        if (!$authHeader || !preg_match('/Bearer\s+(.+)/i', $authHeader, $matches)) {
             $this->sendErrorResponse("Unauthorized: No token provided", 401);
             exit; 
         }
@@ -30,6 +30,15 @@ class Controller
             exit;
         }
 
+        return $user;
+    }
+
+    protected function ensureAdmin() {
+        $user = $this->getAuthenticatedUser();
+        if ((int)$user->roleId !== 2) {
+            $this->sendErrorResponse("Unauthorized", 403);
+            exit;
+        }
         return $user;
     }
 

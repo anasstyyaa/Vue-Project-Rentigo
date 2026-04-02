@@ -7,6 +7,7 @@ import UserManagementPage from '../components/pages/UserManagementPage/UserManag
 import CarManagementPage from '../components/pages/CarManagementPage/CarManagementPage.vue';
 import ProfilePage from '../components/pages/ProfilePage/ProfilePage.vue';
 import BookingPage from '../components/pages/BookingPage/BookingPage.vue';
+import AdminDashboardPage from '../components/pages/AdminDashboardPage/AdminDashboardPage.vue';
 
 const routes = [
   { path: '/', component: CarArchivePage },
@@ -17,6 +18,7 @@ const routes = [
   { path: '/admin/cars', component: CarManagementPage },
   { path: '/login', component: LoginPage },
   { path: '/profile', component: ProfilePage },
+  { path: '/admin/bookings', component: AdminDashboardPage },
 ];
 
 export default createRouter({

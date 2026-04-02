@@ -59,15 +59,16 @@ class RentalService implements IRentalService
         if (empty($reason)) {
             throw new \Exception("A reason for cancellation is required.");
         }
-
-        // Business Rule: Can't cancel if the rental already started
-        // You would fetch the rental first and check the StartDate here.
-        
         return $this->rentalRepository->cancel($id, $reason);
     }
 
     public function isCarBooked(int $carId, string $startDate, string $endDate): bool
     {
         return $this->rentalRepository->isCarBooked($carId, $startDate, $endDate);
+    }
+
+    public function getAllBookings(): array
+    {
+        return $this->rentalRepository->getAllBookings();
     }
 }

@@ -67,4 +67,20 @@ class RentalController extends Controller
             return $this->sendErrorResponse($e->getMessage());
         }
     }
+
+
+    // admin 
+
+    public function getDashboardBookings() {
+        try {
+            $user = $this->getAuthenticatedUser();
+            //$this->ensureAdmin($user);
+
+            $bookings = $this->service->getAllBookings();
+            return $this->sendSuccessResponse($bookings);
+
+        } catch (\Exception $e) {
+            return $this->sendErrorResponse($e->getMessage(), 500);
+        }
+    }
 }

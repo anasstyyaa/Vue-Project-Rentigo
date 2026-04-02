@@ -19,6 +19,11 @@
       </div>
 
       <div>
+        <Text as="label" size="sm" weight="semibold">Username</Text>
+        <input v-model="formData.username" type="text" class="form-input" required  />
+      </div>
+
+      <div>
         <Text as="label" size="sm" weight="semibold">Phone Number</Text>
         <input v-model="formData.phoneNumber" type="text" class="form-input" required />
       </div>
@@ -75,12 +80,13 @@ const emit = defineEmits(['register']);
 const formData = reactive({
   firstName: '',
   lastName: '',
+  username: '', 
+  phoneNumber: '',
   email: '',
   password: ''
 });
 
 const handleSubmit = () => {
-  
   emit('register', { ...formData });
 };
 </script>

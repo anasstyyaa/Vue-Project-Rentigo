@@ -65,6 +65,7 @@ $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->addRoute('DELETE', '/api/users/{id:\d+}', ['App\Controllers\UserController', 'delete']);
     $r->addRoute('POST', '/api/users', ['App\Controllers\UserController', 'create']);
     $r->addRoute(['PUT', 'POST'], '/api/users/{id:\d+}', ['App\Controllers\UserController', 'update']);
+    $r->addRoute('GET', '/api/admin/bookings', ['App\Controllers\RentalController', 'getDashboardBookings']);
     
 });
 

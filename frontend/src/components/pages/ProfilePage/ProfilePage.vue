@@ -172,8 +172,8 @@ const handleCancelSubmit = async (reason) => {
     
     if (response.ok) {
       showCancelModal.value = false;
-      activeBooking.value = null; // Reset
-      await fetchProfileData(); // Refresh table
+      activeBooking.value = null;
+      await fetchProfileData(); 
     } else {
       const errorData = await response.json();
       alert(errorData.error || "Could not cancel booking.");
@@ -237,7 +237,7 @@ const handleReviewSubmit = async (reviewData) => {
       },
       body: JSON.stringify({
         rentalId: activeBooking.value.rentalId,
-        carId: activeBooking.value.carId, // Ensure your booking object has carId
+        carId: activeBooking.value.carId, 
         userId: user.value.id,
         rating: reviewData.rating,
         comment: reviewData.comment
@@ -247,7 +247,6 @@ const handleReviewSubmit = async (reviewData) => {
     if (response.ok) {
       showReviewModal.value = false;
       alert("Thank you for your review!");
-      // Optionally refresh bookings to hide the "Leave Review" button
       await fetchProfileData();
     }
   } catch (error) {
@@ -260,8 +259,6 @@ const handleReviewSubmit = async (reviewData) => {
 const openEditModal = () => {
   console.log("Edit modal opened");
 };
-
-
 
 onMounted(fetchProfileData);
 </script>

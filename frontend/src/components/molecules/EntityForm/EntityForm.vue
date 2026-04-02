@@ -91,7 +91,6 @@ const formData = ref({});
 
 const updateFormData = (data) => {
   if (!data) return;
-  //formData.value = JSON.parse(JSON.stringify(data));
   formData.value = { ...data };
   if (!formData.value.images) formData.value.images = [];
 };

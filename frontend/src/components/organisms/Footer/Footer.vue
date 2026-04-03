@@ -2,66 +2,71 @@
   <footer class="bg-gray-50 border-t border-gray-200 mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <!-- Brand section -->
         <div class="col-span-1 md:col-span-2">
-          <Heading :level="3" size="lg" class="mb-4">
-            Article Archive
+          <Heading :level="3" size="lg" class="mb-4 text-blue-600">
+            Rentigo
           </Heading>
-          <Text as="p" size="sm" color="muted" class="mb-4">
-            Your source for quality articles on technology, science, health, and more.
+          <Text as="p" size="sm" color="muted" class="mb-4 max-w-sm">
+            Premium car rentals for your next journey. Experience comfort, 
+            reliability, and style with our extensive fleet of vehicles 
+            tailored to your needs.
           </Text>
           <div class="flex space-x-4">
             <a 
               v-for="social in socialLinks" 
               :key="social.name"
               :href="social.href" 
-              class="text-gray-600 hover:text-blue-600 transition-colors"
+              class="text-gray-400 hover:text-blue-600 transition-colors"
               :aria-label="social.name"
             >
-              <component :is="social.icon" class="h-5 w-5" />
+              <span class="text-xs font-bold uppercase tracking-wider">{{ social.name }}</span>
             </a>
           </div>
         </div>
         
-        <!-- Quick Links -->
         <div>
           <Heading :level="4" size="md" class="mb-4">
-            Quick Links
+            Rent With Us
           </Heading>
           <ul class="space-y-2">
             <li v-for="link in quickLinks" :key="link.name">
-              <a 
-                :href="link.href" 
+              <router-link 
+                :to="link.href" 
                 class="text-gray-600 hover:text-blue-600 transition-colors text-sm"
               >
                 {{ link.name }}
-              </a>
+              </router-link> 
             </li>
           </ul>
         </div>
         
-        <!-- Legal -->
         <div>
           <Heading :level="4" size="md" class="mb-4">
-            Legal
+            Support
           </Heading>
           <ul class="space-y-2">
             <li v-for="link in legalLinks" :key="link.name">
-              <a 
-                :href="link.href" 
+              <router-link 
+                :to="link.href" 
                 class="text-gray-600 hover:text-blue-600 transition-colors text-sm"
               >
                 {{ link.name }}
-              </a>
+              </router-link>
             </li>
           </ul>
         </div>
       </div>
       
       <div class="mt-8 pt-8 border-t border-gray-200">
-        <Text as="p" size="sm" color="muted" class="text-center">
-          © {{ currentYear }} Article Archive. All rights reserved.
-        </Text>
+        <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <Text as="p" size="sm" color="muted">
+            © {{ currentYear }} Rentigo Car Rentals. All rights reserved.
+          </Text>
+          <div class="flex space-x-6">
+             <Text size="xs" color="muted" class="hover:text-blue-600 cursor-pointer">Help Center</Text>
+             <Text size="xs" color="muted" class="hover:text-blue-600 cursor-pointer">Safety Information</Text>
+          </div>
+        </div>
       </div>
     </div>
   </footer>
@@ -76,23 +81,28 @@ defineProps({
   quickLinks: {
     type: Array,
     default: () => [
-      { name: 'Home', href: '/' },
-      { name: 'Articles', href: '/articles' },
-      { name: 'Categories', href: '/categories' },
-      { name: 'About', href: '/about' },
+      { name: 'Browse Fleet', href: '/cars' },
+      { name: 'Locations', href: '/locations' },
+      { name: 'Special Offers', href: '/offers' },
+      { name: 'How it Works', href: '/how-it-works' },
     ],
   },
   legalLinks: {
     type: Array,
     default: () => [
       { name: 'Privacy Policy', href: '/privacy' },
-      { name: 'Terms of Service', href: '/terms' },
-      { name: 'Cookie Policy', href: '/cookies' },
+      { name: 'Terms & Conditions', href: '/terms' },
+      { name: 'Insurance Info', href: '/insurance' },
+      { name: 'Contact Us', href: '/contact' },
     ],
   },
   socialLinks: {
     type: Array,
-    default: () => [],
+    default: () => [
+      { name: 'FB', href: '#' },
+      { name: 'IG', href: '#' },
+      { name: 'X', href: '#' },
+    ],
   },
 });
 

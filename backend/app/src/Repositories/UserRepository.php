@@ -48,7 +48,7 @@ class UserRepository extends Repository implements IUserRepository
                     CreatedAt AS createdAt, 
                     IsActive AS isActive 
                 FROM Users 
-                WHERE Email = :email LIMIT 1";
+                WHERE Email = :email AND IsActive = 1 LIMIT 1";
 
         $stmt = $this->getConnection()->prepare($sql);
         $stmt->execute([':email' => $email]);

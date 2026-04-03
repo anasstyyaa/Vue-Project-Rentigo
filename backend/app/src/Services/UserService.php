@@ -71,6 +71,22 @@ class UserService implements IUserService
             throw new \Exception("User not found.");
         }
 
+        if (empty($user->email) || !filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+            throw new \Exception("A valid email address is required.");
+        }
+
+        
+        // checking if the passwordHash sent from the controller is different from existing one 
+        if (!empty($_POST['password'])) { 
+            $newPassword = $_POST['password'];
+            if (strlen($newPassword) < 8) {
+                throw new \Exception("Password must be at least 8 characters long.");
+            }
+            $user->passwordHash = password_hash($newPassword, PASSWORD_BCRYPT);
+        } else {
+            $user->passwordHash = $existingUser->passwordHash;
+        }
+
         $newFileUploaded = false;
 
         if (isset($_FILES['profilePicture']) && $_FILES['profilePicture']['error'] === UPLOAD_ERR_OK) {
@@ -85,16 +101,6 @@ class UserService implements IUserService
             if ($user->profilePicture === '[object File]' || empty($user->profilePicture)) {
                 $user->profilePicture = $existingUser->profilePicture;
             }
-        }
-
-        if (empty($user->email)) {
-            throw new \Exception("Email cannot be empty.");
-        }
-
-        if (!empty($user->passwordHash)) { 
-            $user->passwordHash = password_hash($user->passwordHash, PASSWORD_BCRYPT);
-        } else {
-            $user->passwordHash = $existingUser->passwordHash;
         }
 
         return $this->repository->update($user);

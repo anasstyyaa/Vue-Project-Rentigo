@@ -31,6 +31,7 @@
       />
     </template>
   </ProfileTemplate>
+  <Footer />
 
   <ModalAtom :show="showCancelModal" @close="showCancelModal = false">
     <CancelBookingForm 
@@ -93,15 +94,13 @@ import ProfileSummary from '../../molecules/ProfileSummary/ProfileSummary.vue';
 import PersonalInfoCard from '../../organisms/PersonalInfoCard/PersonalInfoCard.vue';
 import BookingsTable from '../../organisms/BookingsTable/BookingsTable.vue';
 import Text from '../../atoms/Text/Text.vue';
-import Heading from '../../atoms/Heading/Heading.vue';
 import Badge from '../../atoms/Badge/Badge.vue';
-import MyButton from '../../atoms/Button/Button.vue';
 import ModalAtom from '../../atoms/Modal/Modal.vue';
 import CancelBookingForm from '../../organisms/CancelBookingForm/CancelBookingForm.vue'; 
 import BookingSuccessSummary from '../../organisms/BookingSuccessSummary/BookingSuccessSummary.vue';
 import ReviewForm from '../../organisms/ReviewForm/ReviewForm.vue';
 import EntityForm from '../../molecules/EntityForm/EntityForm.vue';
-
+import Footer from '@/components/organisms/Footer/Footer.vue';
 
 
 const route = useRoute();
@@ -162,7 +161,11 @@ const fetchProfileData = async () => {
   }
 };
 
-
+const handleLogout = () => {
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('user');
+  router.push('/login');
+};
 
 const showCancelModal = ref(false);
 const activeBooking = ref(null);
@@ -298,6 +301,16 @@ const userSchema = [
 ];
 
 const handleProfileSubmit = async (formData) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(formData.email)) {
+    alert("Please enter a valid email address.");
+    return;
+  }
+
+  if (formData.password && formData.password.length < 8) {
+    alert("Password must be at least 8 characters long.");
+    return;
+  }
   editLoading.value = true;
   const token = localStorage.getItem('auth_token');
   

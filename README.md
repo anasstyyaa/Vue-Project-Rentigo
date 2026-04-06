@@ -29,6 +29,9 @@ Design & UI Consistency:
 
 - **Storybook**: Integrated Storybook as a "workshop" environment. Each Atomic component is developed and documented in isolation, ensuring UI components are bug-free and visually consistent before they are integrated into the main application.
 
+## AI Assistance
+Throughout the development of this project, I utilized AI to accelerate the engineering lifecycle.Specifically, AI helped in drafting complex SQL queries for the repository methods, create the initial structures of Vue components, and refining the responsive Tailwind CSS layouts. AI also assisted with debugging complex state management and refactoring the custom PHP MVC router.
+
 ## Login Credentials 
 
 Admin account login credentials:
@@ -42,6 +45,7 @@ User account login credentials:
 
 ## Future Implementations
 Currently, the application uses "prop drilling" to pass booking data through multiple layers of components. Transitioning to Pinia will centralize the application state, allowing components to access data directly from a global store. This will simplify the component architecture and make the codebase significantly more maintainable.
+
 
 ## 📁 Project Structure
 

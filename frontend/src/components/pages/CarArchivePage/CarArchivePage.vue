@@ -21,6 +21,28 @@
     @learn-more-click="goToDetailPage"
   />
 
+  <div class="flex justify-center space-x-4 py-8 bg-gray-50">
+    <button 
+      :disabled="currentPage === 1"
+      @click="fetchCars(currentPage - 1)"
+      class="px-4 py-2 bg-white border rounded shadow-sm disabled:opacity-50"
+    >
+      Previous
+    </button>
+    
+    <span class="py-2 text-gray-600">
+      Page {{ currentPage }} of {{ pagination.totalPages }}
+    </span>
+
+    <button 
+      :disabled="currentPage === pagination.totalPages"
+      @click="fetchCars(currentPage + 1)"
+      class="px-4 py-2 bg-white border rounded shadow-sm disabled:opacity-50"
+    >
+      Next
+    </button>
+  </div>
+  <Footer/>
 </template>
 
 <script setup>
@@ -28,9 +50,12 @@ import { useRouter } from 'vue-router';
 import { ref, onMounted, computed } from "vue";
 import CarArchive from "../../templates/CarArchive/CarArchive.vue";
 import { get } from "../../../utils/api.js";
+import Footer from "../../organisms/Footer/Footer.vue"; 
 
 const router = useRouter();
 const cars = ref([]);
+const pagination = ref({}); 
+const currentPage = ref(1);
 const loading = ref(true);
 const error = ref(null);
 
@@ -44,19 +69,22 @@ const filters = ref({
   onlyAvailable: false
 });
 
-const fetchCars = async () => {
+const fetchCars = async (page = 1) => {
   loading.value = true;
   error.value = null;
+  currentPage.value = page;
 
   try {
-    const response = await get("/api/cars"); 
+    const response = await get(`/api/cars?page=${page}&limit=9`); 
 
     if (!response.ok) {
       throw new Error(`Error ${response.status}: Failed to load the fleet.`);
     }
 
-    const data = await response.json();
-    cars.value = data;
+    const result = await response.json();
+    cars.value = result.data || []; 
+    pagination.value = result.meta || {};
+    
   } catch (err) {
     error.value = err.message;
   } finally {
@@ -65,6 +93,7 @@ const fetchCars = async () => {
 };
 
 const filteredCars = computed(() => {
+  const sourceData = Array.isArray(cars.value) ? cars.value : [];
   let result = [...cars.value];
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
@@ -95,6 +124,14 @@ const filteredCars = computed(() => {
     result.sort((a, b) => a.pricePerDay - b.pricePerDay);
   } else if (sortBy.value === 'price_desc') {
     result.sort((a, b) => b.pricePerDay - a.pricePerDay);
+  }
+
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    result = result.filter(car => 
+      car.brand?.toLowerCase().includes(query) || 
+      car.model?.toLowerCase().includes(query)
+    );
   }
 
   return result;

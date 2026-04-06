@@ -15,7 +15,7 @@
       </div>
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <Text size="xs" color="muted" weight="bold" class="uppercase">Active Bookings</Text>
-        <div class="text-3xl font-black mt-1">{{ bookings.length }}</div>
+        <div class="text-3xl font-black mt-1">{{ activeBookingsCount }}</div>
       </div>
     </div>
 
@@ -40,8 +40,26 @@ const bookings = ref([]);
 const loading = ref(true);
 
 const revenue = computed(() => {
-  if (!Array.isArray(bookings.value)) return 0; // Safety first!
-  return bookings.value.reduce((acc, b) => acc + (Number(b.totalPrice) || 0), 0);
+  if (!Array.isArray(bookings.value)) return 0;
+
+  return bookings.value.reduce((acc, b) => {
+    const currentStatus = b.Status || b.status;
+  
+    if (currentStatus === 'Cancelled') {
+      return acc;
+    }
+
+    return acc + (Number(b.TotalPrice) || 0);
+  }, 0);
+});
+
+const activeBookingsCount = computed(() => {
+  if (!Array.isArray(bookings.value)) return 0;
+
+  return bookings.value.filter(b => {
+    const currentStatus = b.Status || b.status;
+    return currentStatus === 'Active' || currentStatus === 'Scheduled';
+  }).length;
 });
 
 const fetchBookings = async () => {

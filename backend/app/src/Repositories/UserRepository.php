@@ -9,28 +9,39 @@ use PDO;
 
 class UserRepository extends Repository implements IUserRepository 
 {
-    public function getAll(): array
+    public function getAll(int $page = 1, int $limit = 10): array
     {
+        $offset = ($page - 1) * $limit;
+        $countSql = "SELECT COUNT(*) FROM Users WHERE IsActive = 1";
+        $countStmt = $this->getConnection()->prepare($countSql);
+        $countStmt->execute();
+        $totalItems = (int)$countStmt->fetchColumn();
         $sql = "SELECT 
-                    UserId AS userId, 
-                    RoleId AS roleId, 
-                    Username AS username,
-                    FirstName AS firstName, 
-                    LastName AS lastName, 
-                    Email AS email, 
-                    ProfilePicture AS profilePicture,
-                    PhoneNumber AS phoneNumber, 
-                    PasswordHash AS passwordHash, 
-                    CreatedAt AS createdAt, 
-                    IsActive AS isActive 
+                    UserId AS userId, RoleId AS roleId, Username AS username,
+                    FirstName AS firstName, LastName AS lastName, Email AS email, 
+                    ProfilePicture AS profilePicture, PhoneNumber AS phoneNumber, 
+                    CreatedAt AS createdAt, IsActive AS isActive 
                 FROM Users
-                WHERE IsActive = 1";
+                WHERE IsActive = 1
+                ORDER BY CreatedAt DESC
+                LIMIT :limit OFFSET :offset";
 
         $stmt = $this->getConnection()->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
 
-        $stmt->setFetchMode(PDO::FETCH_CLASS, User::class);
-        return $stmt->fetchAll();
+        $users = $stmt->fetchAll(PDO::FETCH_CLASS, User::class);
+
+        return [
+            'data' => $users,
+            'meta' => [
+                'totalItems' => $totalItems,
+                'currentPage' => $page,
+                'limit' => $limit,
+                'totalPages' => ceil($totalItems / $limit)
+            ]
+        ];
     }
 
     public function getByEmail(string $email): ?User

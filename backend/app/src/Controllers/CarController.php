@@ -17,12 +17,21 @@ class CarController extends Controller
         $this->carService = $carService;
     }
 
-    public function getAll(){
+    public function getAll()
+    {
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+
+        if ($page < 1) $page = 1;
+        if ($limit < 1 || $limit > 50) $limit = 10;
+
         try {
-            $cars = $this->carService->getAll();
-            return $this->sendSuccessResponse($cars);
+            $result = $this->carService->getAll($page, $limit);
+            header('Content-Type: application/json');
+            echo json_encode($result);
         } catch (\Exception $e) {
-            return $this->sendErrorResponse('Internal server error', 500);
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
         }
     }
 

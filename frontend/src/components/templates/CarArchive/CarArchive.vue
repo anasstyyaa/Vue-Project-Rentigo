@@ -80,14 +80,11 @@
         </div>
       </div>
     </main>
-    
-    <Footer />
   </div>
 </template>
 
 <script setup>
 import Header from '../../organisms/Header/Header.vue';
-import Footer from '../../organisms/Footer/Footer.vue';
 import CarCard from "../../organisms/CarCard/CarCard.vue";
 import Heading from '../../atoms/Heading/Heading.vue';
 import Text from '../../atoms/Text/Text.vue';

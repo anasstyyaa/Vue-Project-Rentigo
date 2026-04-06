@@ -15,14 +15,9 @@ class UserService implements IUserService
         $this->repository = $repository;
     }
 
-    public function getAll(): array
+    public function getAll(int $page = 1, int $limit = 10): array
     {
-        return $this->repository->getAll();
-
-        // return array_map(function($user) {
-        //     unset($user->passwordHash); // avoids passing password to the frontend 
-        //     return $user;
-        // }, $users);
+        return $this->repository->getAll($page, $limit);
     }
 
     public function getByEmail(string $email): ?User

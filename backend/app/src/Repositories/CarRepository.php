@@ -10,7 +10,12 @@ use PDO;
 
 class CarRepository extends Repository implements ICarRepository
 {
-    public function getAll(): array{
+    public function getAll(int $page = 1, int $limit = 10): array
+    {
+        $offset = ($page - 1) * $limit;
+
+        $countSql = "SELECT COUNT(*) FROM Cars WHERE IsDeleted = 0";
+        $totalItems = (int)$this->getConnection()->query($countSql)->fetchColumn();
         $sql = "SELECT 
                     c.CarId AS carId, 
                     c.Brand AS brand, 
@@ -24,10 +29,25 @@ class CarRepository extends Repository implements ICarRepository
                     c.IsAvailable AS isAvailable,
                     (SELECT ImageUrl FROM CarImages WHERE CarId = c.CarId ORDER BY IsMainImage DESC LIMIT 1) AS mainImage
                 FROM Cars c
-                WHERE c.IsDeleted = 0";
+                WHERE c.IsDeleted = 0
+                LIMIT :limit OFFSET :offset";
 
-        $stmt = $this->getConnection()->query($sql);
-        return $stmt->fetchAll(PDO::FETCH_CLASS, Car::class);
+        $stmt = $this->getConnection()->prepare($sql);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $cars = $stmt->fetchAll(PDO::FETCH_CLASS, Car::class);
+
+        return [
+            'data' => $cars,
+            'meta' => [
+                'totalItems'  => $totalItems,
+                'currentPage' => $page,
+                'limit'       => $limit,
+                'totalPages'  => ceil($totalItems / $limit)
+            ]
+        ];
     }
 
     public function getById(int $id): ?Car {

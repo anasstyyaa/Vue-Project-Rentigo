@@ -22,10 +22,6 @@ class RentalService implements IRentalService
         return $this->rentalRepository->getByUserId($userId);
     }
 
-    public function getAll() : array {
-        return $this->rentalRepository->getAll();
-    }
-
     public function create(Rental $rental): ?Rental
     {
         $start = new \DateTime($rental->startDate);

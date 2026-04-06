@@ -11,7 +11,11 @@ class RentalRepository extends Repository implements IRentalRepository
 {
     public function getByUserId(int $userId): array
     {
-        $sql = "SELECT r.*, c.Brand, c.Model, 
+        $statusSql = $this->getDynamicStatusSql();
+        $sql = "SELECT r.RentalId, r.UserId, r.CarId, r.StartDate, r.EndDate, 
+                       r.PricePerDayAtBooking, r.TotalPrice, r.CreatedAt,
+                       ($statusSql) AS Status, 
+                       c.Brand, c.Model, 
                 (SELECT ImageUrl FROM CarImages WHERE CarId = r.CarId LIMIT 1) as MainImage
                 FROM Rentals r
                 INNER JOIN Cars c ON r.CarId = c.CarId
@@ -25,7 +29,11 @@ class RentalRepository extends Repository implements IRentalRepository
     }
 
     public function getAllBookings(): array {
-        $sql = "SELECT r.*, u.FirstName as FirstName, u.LastName as LastName, c.Model, c.Model 
+        $statusSql = $this->getDynamicStatusSql();
+        $sql = "SELECT r.RentalId, r.UserId, r.CarId, r.StartDate, r.EndDate, 
+                       r.PricePerDayAtBooking, r.TotalPrice, r.CreatedAt,
+                       ($statusSql) AS Status,
+                       u.FirstName, u.LastName, c.Model 
                 FROM Rentals r
                 JOIN Users u ON r.UserId = u.UserId
                 JOIN Cars c ON r.CarId = c.CarId
@@ -35,18 +43,6 @@ class RentalRepository extends Repository implements IRentalRepository
         $stmt->execute();
         
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
-    }
-
-    public function getAll(): array
-    {
-        $sql = "SELECT r.*, c.Brand, c.Model, u.FirstName, u.LastName 
-                FROM Rentals r
-                JOIN Cars c ON r.CarId = c.CarId
-                JOIN users u ON r.UserId = u.UserId
-                ORDER BY r.CreatedAt DESC";
-
-        $stmt = $this->getConnection()->query($sql);
-        return $this->mapRowsToModels($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
     public function create(Rental $rental): ?Rental
@@ -98,6 +94,7 @@ class RentalRepository extends Repository implements IRentalRepository
         $sql = "SELECT COUNT(*) FROM Rentals 
                 WHERE CarId = :carId 
                 AND Status != 'Cancelled'
+                AND CancelledAt IS NULL
                 AND (StartDate < :endDate AND EndDate > :startDate)";
 
         $stmt = $this->getConnection()->prepare($sql);
@@ -134,5 +131,15 @@ class RentalRepository extends Repository implements IRentalRepository
             $rentals[] = $rental;
         }
         return $rentals;
+    }
+
+    private function getDynamicStatusSql(): string 
+    {
+        return "CASE 
+                    WHEN r.Status = 'Cancelled' OR r.CancelledAt IS NOT NULL THEN 'Cancelled'
+                    WHEN NOW() > r.EndDate THEN 'Completed'
+                    WHEN NOW() < r.StartDate THEN 'Scheduled'
+                    ELSE 'Active'
+                END";
     }
 }

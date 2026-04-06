@@ -14,14 +14,14 @@
         </div>
         <div>
           <Text weight="semibold" color="default">{{ car.brand }} {{ car.model }}</Text>
-          <Text size="xs" color="muted">{{ car.year }}</Text>
+          <Text size="xs" color="muted" class="p-2">{{ car.year }}</Text>
         </div>
       </div>
     </TableColumn>
 
     <TableColumn>
       <Text size="sm" color="muted">{{ car.transmission }}</Text>
-      <Text size="xs" color="muted">{{ car.fuelType }}</Text>
+      <Text size="sm" color="muted" class="p-2">{{ car.fuelType }}</Text>
     </TableColumn>
 
     <TableColumn>

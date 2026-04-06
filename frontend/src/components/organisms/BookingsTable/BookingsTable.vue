@@ -66,12 +66,17 @@ const currentTab = ref('active');
 const filteredBookings = computed(() => {
   if (!props.bookings) return [];
 
-  return props.bookings.map(booking => ({
-    ...booking,
-    canCancel: ['Confirmed', 'Pending', 'Booked'].includes(booking.status)
-  })).filter(b => {
-    const isActiveStatus = ['Confirmed', 'Pending', 'Booked'].includes(b.status);
-    return currentTab.value === 'active' ? isActiveStatus : !isActiveStatus;
+  return props.bookings.map(booking => {
+    const status = booking.Status || booking.status;
+
+    return {
+      ...booking,
+      canCancel: status === 'Scheduled' || status === 'Active'
+    };
+  }).filter(b => {
+    const status = b.Status || b.status;
+    const isActiveTab = ['Active', 'Scheduled', 'Booked'].includes(status);
+    return currentTab.value === 'active' ? isActiveTab : !isActiveTab;
   });
 });
 </script>

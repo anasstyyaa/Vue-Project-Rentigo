@@ -8,7 +8,7 @@ use App\Repositories\Interfaces\ICarRepository;
 
 interface ICarService
 { 
-    public function getAll(): array;
+    public function getAll(int $page = 1, int $limit = 10): array;
     public function getById(int $id): ?Car;
     public function create(Car $car): ?Car;
     public function update(Car $car): bool;

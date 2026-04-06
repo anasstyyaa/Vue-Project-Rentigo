@@ -14,6 +14,30 @@
       @delete="handleDelete"
     />
 
+    <div v-if="pagination.totalPages > 1" class="mt-6 flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+      <span class="text-sm text-gray-600">
+        Page {{ currentPage }} of {{ pagination.totalPages }}
+      </span>
+      
+      <div class="flex gap-2">
+        <button 
+          @click="fetchUsers(currentPage - 1)" 
+          :disabled="currentPage === 1"
+          class="px-4 py-2 border rounded disabled:opacity-50 hover:bg-gray-50"
+        >
+          Previous
+        </button>
+        
+        <button 
+          @click="fetchUsers(currentPage + 1)" 
+          :disabled="currentPage === pagination.totalPages"
+          class="px-4 py-2 border rounded disabled:opacity-50 hover:bg-gray-50"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+
     <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-xl shadow-xl w-full max-w-md flex flex-col max-h-[90vh]">
         
@@ -49,6 +73,11 @@ const route = useRoute();
 const router = useRouter();
 const users = ref([]);
 const isLoading = ref(false);
+const currentPage = ref(1);
+const pagination = ref({
+  totalPages: 1,
+  totalItems: 0
+});
 
 const isModalOpen = ref(false);
 const editingUser = ref(null); // null means "create mode", object means "edit mode"
@@ -100,11 +129,13 @@ const closeModal = () => {
   isModalOpen.value = false;
 };
 
-const fetchUsers = async () => {
+const fetchUsers = async (page = 1) => {
   isLoading.value = true;
+  currentPage.value = page;
   try {
-    const response = await axios.get('/api/users');
-    users.value = response.data;
+    const response = await axios.get(`/api/users?page=${page}&limit=10`);
+    users.value = response.data.data;
+    pagination.value = response.data.meta;
   } catch (error) {
     console.error("Error fetching users:", error);
     alert("Failed to load users.");
@@ -153,7 +184,7 @@ const handleFormSubmit = async (formData) => {
     });
 
     closeModal();
-    await fetchUsers();
+    await fetchUsers(currentPage.value);
   } catch (error) {
     console.error("Server Response:", error.response?.data);
   }

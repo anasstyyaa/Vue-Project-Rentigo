@@ -23,10 +23,13 @@ class UserController extends Controller
 
     public function index(){
         try {
-            $users = $this->userService->getAll(); 
-            header ('Content-Type: application/json');
-            echo json_encode($users);
+            $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
 
+            $result = $this->userService->getAll($page, $limit); 
+            
+            header('Content-Type: application/json');
+            echo json_encode($result);
         } catch (\Exception $e) {
             return $this->sendErrorResponse('An error occurred while fetching users', 500);
         }

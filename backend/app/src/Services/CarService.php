@@ -19,9 +19,9 @@ class CarService implements ICarService
     /**
      * @return Car[]
      */
-    public function getAll(): array
+    public function getAll(int $page = 1, int $limit = 10): array
     {
-        return $this->repository->getAll();
+        return $this->repository->getAll($page, $limit);
     }
 
     public function getById(int $id): ?Car

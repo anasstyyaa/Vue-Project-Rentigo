@@ -14,6 +14,43 @@
         @delete="handleDelete"
       />
 
+      <div v-if="paginationMeta.totalPages > 1" class="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
+        <p class="text-sm text-gray-700">
+          Showing <span class="font-medium">{{ cars.length }}</span> of 
+          <span class="font-medium">{{ paginationMeta.totalItems }}</span> cars
+        </p>
+        
+        <div class="flex space-x-2">
+          <button 
+            @click="fetchCars(currentPage - 1)" 
+            :disabled="currentPage === 1"
+            class="px-3 py-1 border rounded bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          >
+            Previous
+          </button>
+          
+          <button 
+            v-for="page in paginationMeta.totalPages" 
+            :key="page"
+            @click="fetchCars(page)"
+            :class="[
+              'px-3 py-1 border rounded text-sm transition-colors',
+              currentPage === page ? 'bg-blue-600 text-white border-blue-600' : 'bg-white hover:bg-gray-50'
+            ]"
+          >
+            {{ page }}
+          </button>
+
+          <button 
+            @click="fetchCars(currentPage + 1)" 
+            :disabled="currentPage === paginationMeta.totalPages"
+            class="px-3 py-1 border rounded bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
       <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 flex items-start justify-center z-50 overflow-y-auto p-4 sm:p-6">
         <div class="bg-white p-6 rounded-xl shadow-xl w-full max-w-md my-auto h-auto max-h-[90vh] flex flex-col">
   
@@ -47,6 +84,11 @@ const route = useRoute();
 const router = useRouter();
 const cars = ref([]);
 const isLoading = ref(false);
+const currentPage = ref(1);
+const paginationMeta = ref({
+  totalPages: 1,
+  totalItems: 0
+});
 
 const isModalOpen = ref(false);
 const editingCar = ref(null); // null means "create mode", object means "edit mode"
@@ -121,11 +163,17 @@ const closeModal = () => {
   isModalOpen.value = false;
 };
 
-const fetchCars = async () => {
+const fetchCars = async (page = 1) => {
   isLoading.value = true;
+  currentPage.value = page;
   try {
-    const response = await axios.get('/api/cars');
-    cars.value = response.data;
+    const response = await axios.get(`/api/cars?page=${page}&limit=15`);
+    if (response.data && response.data.data) {
+      cars.value = response.data.data;
+      paginationMeta.value = response.data.meta;
+    } else {
+      cars.value = response.data;
+    }
   } catch (error) {
     console.error("Error fetching cars:", error);
     alert("Failed to load cars.");
@@ -133,6 +181,7 @@ const fetchCars = async () => {
     isLoading.value = false;
   }
 };
+
 const handleFormSubmit = async (formData) => {
   const data = new FormData();
   const isEdit = !!editingCar.value;
@@ -173,7 +222,7 @@ const handleFormSubmit = async (formData) => {
     });
 
     closeModal();
-    await fetchCars(); 
+    await fetchCars(currentPage.value);
     alert(isEdit ? "Car updated!" : "Car created!");
     
   } catch (error) {
